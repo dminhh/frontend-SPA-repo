@@ -18,6 +18,9 @@ coverage
 .claude/settings.local.json
 .superpowers/
 
+# Design docs kept local, not published
+docs/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
