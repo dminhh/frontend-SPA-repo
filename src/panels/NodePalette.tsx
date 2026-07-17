@@ -1,6 +1,10 @@
 import { NODE_DEFS } from '../nodes';
 
-export function NodePalette() {
+type Props = {
+  onLoadSample: () => void;
+};
+
+export function NodePalette({ onLoadSample }: Props) {
   return (
     <aside className="w-48 shrink-0 border-r border-slate-200 bg-white p-3">
       <h2 className="mb-3 text-xs font-semibold tracking-wide text-slate-500 uppercase">Node</h2>
@@ -21,6 +25,17 @@ export function NodePalette() {
       </div>
       <p className="mt-4 text-xs leading-relaxed text-slate-400">
         Kéo node vào canvas. Nối các node bằng cách kéo từ chấm tròn dưới sang chấm tròn trên.
+      </p>
+
+      <button
+        type="button"
+        onClick={onLoadSample}
+        className="mt-4 w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
+      >
+        Ví dụ
+      </button>
+      <p className="mt-1.5 text-xs leading-relaxed text-slate-400">
+        Đổ một kịch bản mẫu ra canvas, thay hết node đang có.
       </p>
     </aside>
   );

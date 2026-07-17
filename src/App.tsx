@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import {
   addEdge,
   Background,
@@ -15,6 +15,7 @@ import { NODE_DEFS, nodeTypes } from './nodes';
 import { NodePalette } from './panels/NodePalette';
 import { Inspector } from './panels/Inspector';
 import { BuildPanel } from './panels/BuildPanel';
+import { createSampleFlow } from './sample';
 import type { BotNode, BotNodeType } from './types';
 
 function Canvas() {
@@ -25,6 +26,9 @@ function Canvas() {
   // `nodes` prop on the next render.
   const { screenToFlowPosition, fitView } = useReactFlow<BotNode, Edge>();
   const nextId = useRef(1);
+  // Bumped on every sample load and used as BuildPanel's key, which remounts it
+  // and drops a Build result that describes a graph no longer on the canvas.
+  const [sampleLoads, setSampleLoads] = useState(0);
 
   const onConnect = useCallback(
     (connection: Connection) => setEdges((eds) => addEdge(connection, eds)),
@@ -61,6 +65,17 @@ function Canvas() {
     [setNodes],
   );
 
+  const onLoadSample = useCallback(() => {
+    const { nodes: sampleNodes, edges: sampleEdges } = createSampleFlow();
+    setNodes(sampleNodes);
+    setEdges(sampleEdges);
+    // The sample occupies n1..nN. Resume the counter past them, or the next drop
+    // takes an id the sample already uses.
+    nextId.current = sampleNodes.length + 1;
+    setSampleLoads((n) => n + 1);
+    void fitView({ duration: 400, maxZoom: 1 });
+  }, [setNodes, setEdges, fitView]);
+
   const onFocusNode = useCallback(
     (id: string) => {
       setNodes((nds) => nds.map((n) => ({ ...n, selected: n.id === id })));
@@ -71,7 +86,7 @@ function Canvas() {
 
   return (
     <div className="flex h-full">
-      <NodePalette />
+      <NodePalette onLoadSample={onLoadSample} />
       <div
         className="h-full flex-1"
         onDrop={onDrop}
@@ -94,7 +109,7 @@ function Canvas() {
       </div>
       <aside className="flex w-80 shrink-0 flex-col border-l border-slate-200 bg-white">
         <Inspector node={selected} onChange={onFieldChange} />
-        <BuildPanel nodes={nodes} edges={edges} onFocusNode={onFocusNode} />
+        <BuildPanel key={sampleLoads} nodes={nodes} edges={edges} onFocusNode={onFocusNode} />
       </aside>
     </div>
   );
