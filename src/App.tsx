@@ -14,6 +14,7 @@ import {
 import { NODE_DEFS, nodeTypes } from './nodes';
 import { NodePalette } from './panels/NodePalette';
 import { Inspector } from './panels/Inspector';
+import { BuildPanel } from './panels/BuildPanel';
 import type { BotNode, BotNodeType } from './types';
 
 function Canvas() {
@@ -22,7 +23,7 @@ function Canvas() {
   // Node state lives in useNodesState. Only take view helpers from useReactFlow —
   // its setNodes writes to the internal store and would be overwritten by the
   // `nodes` prop on the next render.
-  const { screenToFlowPosition } = useReactFlow<BotNode, Edge>();
+  const { screenToFlowPosition, fitView } = useReactFlow<BotNode, Edge>();
   const nextId = useRef(1);
 
   const onConnect = useCallback(
@@ -60,6 +61,14 @@ function Canvas() {
     [setNodes],
   );
 
+  const onFocusNode = useCallback(
+    (id: string) => {
+      setNodes((nds) => nds.map((n) => ({ ...n, selected: n.id === id })));
+      void fitView({ nodes: [{ id }], duration: 400, maxZoom: 1.2 });
+    },
+    [setNodes, fitView],
+  );
+
   return (
     <div className="flex h-full">
       <NodePalette />
@@ -85,6 +94,7 @@ function Canvas() {
       </div>
       <aside className="flex w-80 shrink-0 flex-col border-l border-slate-200 bg-white">
         <Inspector node={selected} onChange={onFieldChange} />
+        <BuildPanel nodes={nodes} edges={edges} onFocusNode={onFocusNode} />
       </aside>
     </div>
   );
