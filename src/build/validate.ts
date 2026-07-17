@@ -1,5 +1,5 @@
 import type { Edge } from '@xyflow/react';
-import { LABELS, type BotNode, type BotNodeType } from '../types';
+import { BRANCH, LABELS, type BotNode, type BotNodeType } from '../types';
 
 export type Issue = { nodeId?: string; message: string };
 
@@ -66,9 +66,15 @@ function checkFanOut(nodes: BotNode[], edges: Edge[]): Issue[] {
 function checkConditionBranches(nodes: BotNode[], edges: Edge[]): Issue[] {
   const issues: Issue[] = [];
   for (const node of nodes.filter((n) => n.type === 'condition')) {
-    for (const branch of ['true', 'false'] as const) {
-      if (!edges.some((e) => e.source === node.id && e.sourceHandle === branch)) {
+    for (const branch of [BRANCH.true, BRANCH.false] as const) {
+      const count = edges.filter((e) => e.source === node.id && e.sourceHandle === branch).length;
+      if (count === 0) {
         issues.push({ nodeId: node.id, message: `Node Condition: thiếu nhánh ${branch}` });
+      } else if (count > 1) {
+        issues.push({
+          nodeId: node.id,
+          message: `Node Condition: nhánh ${branch} nối tới nhiều hơn một node`,
+        });
       }
     }
   }

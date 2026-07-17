@@ -81,6 +81,38 @@ describe('validate', () => {
     });
   });
 
+  it('rejects a condition with two edges on the same branch', () => {
+    const nodes = [
+      node('n1', 'start'),
+      node('n2', 'condition', { expression: "name == 'admin'" }),
+      node('n3', 'end'),
+      node('n4', 'end'),
+      node('n5', 'end'),
+    ];
+    const edges = [
+      edge('n1', 'n2'),
+      edge('n2', 'n3', 'true'),
+      edge('n2', 'n4', 'true'),
+      edge('n2', 'n5', 'false'),
+    ];
+    const issues = validate(nodes, edges);
+    expect(issues).toContainEqual({
+      nodeId: 'n2',
+      message: 'Node Condition: nhánh true nối tới nhiều hơn một node',
+    });
+  });
+
+  it('accepts a condition with exactly one edge per branch', () => {
+    const nodes = [
+      node('n1', 'start'),
+      node('n2', 'condition', { expression: "name == 'admin'" }),
+      node('n3', 'end'),
+      node('n4', 'end'),
+    ];
+    const edges = [edge('n1', 'n2'), edge('n2', 'n3', 'true'), edge('n2', 'n4', 'false')];
+    expect(validate(nodes, edges)).toEqual([]);
+  });
+
   it('rejects a node unreachable from start', () => {
     const nodes = [
       node('n1', 'start'),

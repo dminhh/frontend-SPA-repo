@@ -15,6 +15,11 @@ export type BotNode =
   | ConditionNodeType
   | EndNodeType;
 
+/** Handle ids on ConditionNode's two source handles. The canvas sets these as
+ *  `sourceHandle`; validate() and compile() read them back. Shared so a rename
+ *  moves all three sites together. */
+export const BRANCH = { true: 'true', false: 'false' } as const;
+
 export const LABELS: Record<BotNodeType, string> = {
   start: 'Start',
   message: 'Message',

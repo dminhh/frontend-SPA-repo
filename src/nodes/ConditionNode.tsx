@@ -1,5 +1,5 @@
 import { Handle, Position, type NodeProps } from '@xyflow/react';
-import type { ConditionNodeType } from '../types';
+import { BRANCH, type ConditionNodeType } from '../types';
 import { NodeShell } from './NodeShell';
 
 export function ConditionNode({ data, selected }: NodeProps<ConditionNodeType>) {
@@ -13,8 +13,8 @@ export function ConditionNode({ data, selected }: NodeProps<ConditionNodeType>) 
         <span>TRUE</span>
         <span>FALSE</span>
       </div>
-      <Handle id="true" type="source" position={Position.Bottom} style={{ left: '25%' }} />
-      <Handle id="false" type="source" position={Position.Bottom} style={{ left: '75%' }} />
+      <Handle id={BRANCH.true} type="source" position={Position.Bottom} style={{ left: '25%' }} />
+      <Handle id={BRANCH.false} type="source" position={Position.Bottom} style={{ left: '75%' }} />
     </NodeShell>
   );
 }

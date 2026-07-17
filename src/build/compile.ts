@@ -1,5 +1,5 @@
 import type { Edge } from '@xyflow/react';
-import type { BotNode } from '../types';
+import { BRANCH, type BotNode } from '../types';
 
 export type CompiledNode =
   | { type: 'start'; next?: string }
@@ -49,8 +49,8 @@ function compileNode(node: BotNode, edges: Edge[]): CompiledNode {
       return prune<CompiledNode>({
         type: 'condition',
         expression: node.data.expression,
-        onTrue: targetOf(edges, node.id, 'true'),
-        onFalse: targetOf(edges, node.id, 'false'),
+        onTrue: targetOf(edges, node.id, BRANCH.true),
+        onFalse: targetOf(edges, node.id, BRANCH.false),
       });
     case 'end':
       return { type: 'end' };
