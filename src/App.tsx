@@ -13,6 +13,7 @@ import {
 } from '@xyflow/react';
 import { NODE_DEFS, nodeTypes } from './nodes';
 import { NodePalette } from './panels/NodePalette';
+import { Inspector } from './panels/Inspector';
 import type { BotNode, BotNodeType } from './types';
 
 function Canvas() {
@@ -48,6 +49,17 @@ function Canvas() {
     [screenToFlowPosition, setNodes],
   );
 
+  const selected = nodes.find((n) => n.selected);
+
+  const onFieldChange = useCallback(
+    (id: string, patch: Record<string, string>) => {
+      setNodes((nds) =>
+        nds.map((n) => (n.id === id ? ({ ...n, data: { ...n.data, ...patch } } as BotNode) : n)),
+      );
+    },
+    [setNodes],
+  );
+
   return (
     <div className="flex h-full">
       <NodePalette />
@@ -71,6 +83,9 @@ function Canvas() {
           <Controls />
         </ReactFlow>
       </div>
+      <aside className="flex w-80 shrink-0 flex-col border-l border-slate-200 bg-white">
+        <Inspector node={selected} onChange={onFieldChange} />
+      </aside>
     </div>
   );
 }
