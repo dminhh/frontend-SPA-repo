@@ -11,13 +11,14 @@ type Props = {
 };
 
 type Result = { kind: 'json'; text: string } | { kind: 'issues'; issues: Issue[] };
+type CopyState = 'idle' | 'success' | 'failed';
 
 export function BuildPanel({ nodes, edges, onFocusNode }: Props) {
   const [result, setResult] = useState<Result | null>(null);
-  const [copied, setCopied] = useState(false);
+  const [copyState, setCopyState] = useState<CopyState>('idle');
 
   function onBuild() {
-    setCopied(false);
+    setCopyState('idle');
     const issues = validate(nodes, edges);
     setResult(
       issues.length > 0
@@ -28,8 +29,16 @@ export function BuildPanel({ nodes, edges, onFocusNode }: Props) {
 
   async function onCopy() {
     if (result?.kind !== 'json') return;
-    await navigator.clipboard.writeText(result.text);
-    setCopied(true);
+    try {
+      if (!navigator.clipboard) {
+        setCopyState('failed');
+        return;
+      }
+      await navigator.clipboard.writeText(result.text);
+      setCopyState('success');
+    } catch {
+      setCopyState('failed');
+    }
   }
 
   return (
@@ -46,7 +55,7 @@ export function BuildPanel({ nodes, edges, onFocusNode }: Props) {
             onClick={onCopy}
             className="rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
           >
-            {copied ? 'Đã copy' : 'Copy'}
+            {copyState === 'success' ? 'Đã copy' : copyState === 'failed' ? 'Không copy được' : 'Copy'}
           </button>
         )}
       </div>
