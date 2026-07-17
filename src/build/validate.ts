@@ -21,6 +21,7 @@ export function validate(nodes: BotNode[], edges: Edge[]): Issue[] {
     ...checkStart(nodes),
     ...checkRequiredFields(nodes),
     ...checkOutgoing(nodes, edges),
+    ...checkFanOut(nodes, edges),
     ...checkConditionBranches(nodes, edges),
     ...checkReachable(nodes, edges),
   ];
@@ -49,6 +50,17 @@ function checkOutgoing(nodes: BotNode[], edges: Edge[]): Issue[] {
   return nodes
     .filter((n) => NEEDS_NEXT.includes(n.type) && !edges.some((e) => e.source === n.id))
     .map((n) => ({ nodeId: n.id, message: `Node ${LABELS[n.type]}: chưa nối tới node tiếp theo` }));
+}
+
+function checkFanOut(nodes: BotNode[], edges: Edge[]): Issue[] {
+  const issues: Issue[] = [];
+  for (const node of nodes.filter((n) => NEEDS_NEXT.includes(n.type))) {
+    const outgoingCount = edges.filter((e) => e.source === node.id).length;
+    if (outgoingCount > 1) {
+      issues.push({ nodeId: node.id, message: `Node ${LABELS[node.type]}: nối tới nhiều hơn một node` });
+    }
+  }
+  return issues;
 }
 
 function checkConditionBranches(nodes: BotNode[], edges: Edge[]): Issue[] {

@@ -94,4 +94,30 @@ describe('validate', () => {
       message: 'Node Message: không node nào dẫn tới đây',
     });
   });
+
+  it('rejects a message node with multiple outgoing edges', () => {
+    const nodes = [
+      node('n1', 'start'),
+      node('n2', 'message', { text: 'Xin chào!' }),
+      node('n3', 'end'),
+      node('n4', 'end'),
+    ];
+    const edges = [edge('n1', 'n2'), edge('n2', 'n3'), edge('n2', 'n4')];
+    const issues = validate(nodes, edges);
+    expect(issues).toContainEqual({
+      nodeId: 'n2',
+      message: 'Node Message: nối tới nhiều hơn một node',
+    });
+  });
+
+  it('allows a condition node with multiple outgoing edges (two branches)', () => {
+    const nodes = [
+      node('n1', 'start'),
+      node('n2', 'condition', { expression: "name == 'admin'" }),
+      node('n3', 'end'),
+      node('n4', 'end'),
+    ];
+    const edges = [edge('n1', 'n2'), edge('n2', 'n3', 'true'), edge('n2', 'n4', 'false')];
+    expect(validate(nodes, edges)).toEqual([]);
+  });
 });
