@@ -66,7 +66,6 @@ function Canvas() {
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
-          fitView
         >
           <Background />
           <Controls />
