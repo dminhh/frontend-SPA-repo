@@ -2,9 +2,9 @@
 
 Vẽ kịch bản chatbot bằng cách kéo thả node, bấm Build để xuất ra JSON.
 
-![Node](https://img.shields.io/badge/nodes-5-blue)
-
 ## Chạy thử
+
+Cần Node `^20.19.0` hoặc `>=22.12.0` (yêu cầu của Vite 8). Node cũ hơn sẽ cài lỗi.
 
 ```bash
 npm install
