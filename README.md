@@ -1,32 +1,57 @@
-# React + TypeScript + Vite
+# Bot Flow Builder
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Vẽ kịch bản chatbot bằng cách kéo thả node, bấm Build để xuất ra JSON.
 
-Currently, two official plugins are available:
+![Node](https://img.shields.io/badge/nodes-5-blue)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Chạy thử
 
-## React Compiler
+```bash
+npm install
+npm run dev
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Cách dùng
 
-## Expanding the Oxlint configuration
+1. Kéo node từ cột trái vào canvas.
+2. Nối node bằng cách kéo từ chấm dưới sang chấm trên của node kế tiếp.
+3. Chọn node để sửa nội dung ở cột phải.
+4. Bấm **Build** — nếu kịch bản hợp lệ sẽ hiện JSON, nếu không sẽ hiện danh sách lỗi (bấm vào lỗi để nhảy tới node sai).
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+## 5 loại node
+
+| Node | Vai trò |
+|---|---|
+| Start | Điểm bắt đầu |
+| Message | Bot nói một câu |
+| Ask | Hỏi người dùng, lưu câu trả lời vào biến |
+| Condition | Rẽ nhánh true/false |
+| End | Kết thúc |
+
+## JSON xuất ra
 
 ```json
 {
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
+  "version": 1,
+  "start": "n1",
+  "nodes": {
+    "n1": { "type": "start", "next": "n2" },
+    "n2": { "type": "message", "text": "Xin chào!", "next": "n3" },
+    "n3": { "type": "end" }
   }
 }
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Toạ độ node bị bỏ đi khi build — JSON này mô tả kịch bản để chạy bot, không phải để vẽ lại sơ đồ.
+
+## Test
+
+```bash
+npm test
+```
+
+Test phủ `src/build/` — phần compile và validate.
+
+## Stack
+
+Vite · React · TypeScript · Tailwind CSS · React Flow · Vitest
