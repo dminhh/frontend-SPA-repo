@@ -2,6 +2,8 @@
 
 Vẽ kịch bản chatbot bằng cách kéo thả node, bấm Build để xuất ra JSON.
 
+Không lưu trữ gì cả — tải lại trang là canvas trắng tinh, đúng như thiết kế.
+
 ## Chạy thử
 
 Cần Node `^20.19.0` hoặc `>=22.12.0` (yêu cầu của Vite 8). Node cũ hơn sẽ cài lỗi.

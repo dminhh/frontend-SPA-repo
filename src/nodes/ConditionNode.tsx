@@ -1,10 +1,11 @@
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { BRANCH, type ConditionNodeType } from '../types';
+import { ACCENTS } from './accents';
 import { NodeShell } from './NodeShell';
 
 export function ConditionNode({ data, selected }: NodeProps<ConditionNodeType>) {
   return (
-    <NodeShell title="Condition" accent="bg-amber-600" selected={selected}>
+    <NodeShell title="Condition" accent={ACCENTS.condition} selected={selected}>
       <Handle type="target" position={Position.Top} />
       <p className={data.expression ? 'font-mono text-xs' : 'text-slate-400 italic'}>
         {data.expression || 'Chưa có biểu thức'}

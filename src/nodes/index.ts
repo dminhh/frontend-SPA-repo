@@ -1,4 +1,5 @@
 import type { BotNodeType } from '../types';
+import { ACCENTS } from './accents';
 import { StartNode } from './StartNode';
 import { MessageNode } from './MessageNode';
 import { AskNode } from './AskNode';
@@ -21,9 +22,9 @@ export type NodeDef = {
 };
 
 export const NODE_DEFS: NodeDef[] = [
-  { type: 'start', label: 'Start', accent: 'bg-emerald-600', defaultData: {} },
-  { type: 'message', label: 'Message', accent: 'bg-sky-600', defaultData: { text: '' } },
-  { type: 'ask', label: 'Ask', accent: 'bg-violet-600', defaultData: { question: '', variable: '' } },
-  { type: 'condition', label: 'Condition', accent: 'bg-amber-600', defaultData: { expression: '' } },
-  { type: 'end', label: 'End', accent: 'bg-slate-600', defaultData: {} },
+  { type: 'start', label: 'Start', accent: ACCENTS.start, defaultData: {} },
+  { type: 'message', label: 'Message', accent: ACCENTS.message, defaultData: { text: '' } },
+  { type: 'ask', label: 'Ask', accent: ACCENTS.ask, defaultData: { question: '', variable: '' } },
+  { type: 'condition', label: 'Condition', accent: ACCENTS.condition, defaultData: { expression: '' } },
+  { type: 'end', label: 'End', accent: ACCENTS.end, defaultData: {} },
 ];
