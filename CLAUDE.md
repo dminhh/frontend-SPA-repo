@@ -39,7 +39,7 @@ src/
                 Hàm thuần, chỉ import type từ @xyflow/react. Đây là nơi duy nhất được test.
   nodes/        năm node component + registry (index.ts) + accents.ts
   panels/       NodePalette, Inspector, BuildPanel — ba cột giao diện
-  useBotFlow.ts custom hook giữ state đồ thị (nodes/edges) và mọi hành động lên nó
+  hooks/        useBotFlow.ts — custom hook giữ state đồ thị và mọi hành động lên nó
   App.tsx       chỉ dựng layout ba cột; gọi useBotFlow
   types.ts      union BotNode, LABELS, và hằng BRANCH
   sample.ts     flow mẫu cho nút "Ví dụ"

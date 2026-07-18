@@ -3,7 +3,7 @@ import { nodeTypes } from './nodes';
 import { NodePalette } from './panels/NodePalette';
 import { Inspector } from './panels/Inspector';
 import { BuildPanel } from './panels/BuildPanel';
-import { useBotFlow } from './useBotFlow';
+import { useBotFlow } from './hooks/useBotFlow';
 
 function Canvas() {
   const flow = useBotFlow();

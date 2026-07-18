@@ -7,9 +7,9 @@ import {
   type Connection,
   type Edge,
 } from '@xyflow/react';
-import { NODE_DEFS } from './nodes';
-import { createSampleFlow } from './sample';
-import type { BotNode, BotNodeType } from './types';
+import { NODE_DEFS } from '../nodes';
+import { createSampleFlow } from '../sample';
+import type { BotNode, BotNodeType } from '../types';
 
 /**
  * Owns the flow graph: the nodes/edges state and every action that changes it.
