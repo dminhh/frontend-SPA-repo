@@ -44,7 +44,11 @@ describe('validate', () => {
   });
 
   it('reports each missing required field on an ask node', () => {
-    const nodes = [node('n1', 'start'), node('n2', 'ask', { question: '', variable: '' }), node('n3', 'end')];
+    const nodes = [
+      node('n1', 'start'),
+      node('n2', 'ask', { question: '', variable: '' }),
+      node('n3', 'end'),
+    ];
     const edges = [edge('n1', 'n2'), edge('n2', 'n3')];
     const issues = validate(nodes, edges);
     expect(issues).toContainEqual({ nodeId: 'n2', message: 'Node Ask: chưa nhập câu hỏi' });

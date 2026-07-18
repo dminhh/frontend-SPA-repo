@@ -22,13 +22,13 @@ npm run dev
 
 ## 5 loại node
 
-| Node | Vai trò |
-|---|---|
-| Start | Điểm bắt đầu |
-| Message | Bot nói một câu |
-| Ask | Hỏi người dùng, lưu câu trả lời vào biến |
-| Condition | Rẽ nhánh true/false |
-| End | Kết thúc |
+| Node      | Vai trò                                  |
+| --------- | ---------------------------------------- |
+| Start     | Điểm bắt đầu                             |
+| Message   | Bot nói một câu                          |
+| Ask       | Hỏi người dùng, lưu câu trả lời vào biến |
+| Condition | Rẽ nhánh true/false                      |
+| End       | Kết thúc                                 |
 
 ## JSON xuất ra
 

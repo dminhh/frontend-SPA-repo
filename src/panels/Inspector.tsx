@@ -79,7 +79,12 @@ function Field({ label, value, onChange, multiline, mono }: FieldProps) {
     <label className="mb-3 block">
       <span className="mb-1 block text-xs font-medium text-slate-600">{label}</span>
       {multiline ? (
-        <textarea rows={3} className={className} value={value} onChange={(e) => onChange(e.target.value)} />
+        <textarea
+          rows={3}
+          className={className}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+        />
       ) : (
         <input className={className} value={value} onChange={(e) => onChange(e.target.value)} />
       )}

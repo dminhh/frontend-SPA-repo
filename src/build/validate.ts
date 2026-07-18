@@ -39,7 +39,10 @@ function checkRequiredFields(nodes: BotNode[]): Issue[] {
     for (const field of REQUIRED_FIELDS[node.type] ?? []) {
       const value = (node.data as Record<string, unknown>)[field.key];
       if (typeof value !== 'string' || value.trim() === '') {
-        issues.push({ nodeId: node.id, message: `Node ${LABELS[node.type]}: chưa nhập ${field.label}` });
+        issues.push({
+          nodeId: node.id,
+          message: `Node ${LABELS[node.type]}: chưa nhập ${field.label}`,
+        });
       }
     }
   }
@@ -57,7 +60,10 @@ function checkFanOut(nodes: BotNode[], edges: Edge[]): Issue[] {
   for (const node of nodes.filter((n) => NEEDS_NEXT.includes(n.type))) {
     const outgoingCount = edges.filter((e) => e.source === node.id).length;
     if (outgoingCount > 1) {
-      issues.push({ nodeId: node.id, message: `Node ${LABELS[node.type]}: nối tới nhiều hơn một node` });
+      issues.push({
+        nodeId: node.id,
+        message: `Node ${LABELS[node.type]}: nối tới nhiều hơn một node`,
+      });
     }
   }
   return issues;

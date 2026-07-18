@@ -9,11 +9,7 @@ export type ConditionNodeType = Node<{ expression: string }, 'condition'>;
 export type EndNodeType = Node<Record<string, never>, 'end'>;
 
 export type BotNode =
-  | StartNodeType
-  | MessageNodeType
-  | AskNodeType
-  | ConditionNodeType
-  | EndNodeType;
+  StartNodeType | MessageNodeType | AskNodeType | ConditionNodeType | EndNodeType;
 
 /** Handle ids on ConditionNode's two source handles. The canvas sets these as
  *  `sourceHandle`; validate() and compile() read them back. Shared so a rename

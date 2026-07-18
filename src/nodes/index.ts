@@ -25,6 +25,11 @@ export const NODE_DEFS: NodeDef[] = [
   { type: 'start', label: 'Start', accent: ACCENTS.start, defaultData: {} },
   { type: 'message', label: 'Message', accent: ACCENTS.message, defaultData: { text: '' } },
   { type: 'ask', label: 'Ask', accent: ACCENTS.ask, defaultData: { question: '', variable: '' } },
-  { type: 'condition', label: 'Condition', accent: ACCENTS.condition, defaultData: { expression: '' } },
+  {
+    type: 'condition',
+    label: 'Condition',
+    accent: ACCENTS.condition,
+    defaultData: { expression: '' },
+  },
   { type: 'end', label: 'End', accent: ACCENTS.end, defaultData: {} },
 ];

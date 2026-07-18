@@ -14,7 +14,9 @@ export function NodeShell({ title, accent, selected, children }: Props) {
         selected ? 'border-slate-900 ring-2 ring-slate-900/20' : 'border-slate-300'
       }`}
     >
-      <div className={`px-3 py-1.5 text-xs font-semibold tracking-wide text-white uppercase ${accent}`}>
+      <div
+        className={`px-3 py-1.5 text-xs font-semibold tracking-wide text-white uppercase ${accent}`}
+      >
         {title}
       </div>
       {children && <div className="px-3 py-2 text-sm text-slate-700">{children}</div>}

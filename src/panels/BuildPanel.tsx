@@ -55,7 +55,11 @@ export function BuildPanel({ nodes, edges, onFocusNode }: Props) {
             onClick={onCopy}
             className="rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
           >
-            {copyState === 'success' ? 'Đã copy' : copyState === 'failed' ? 'Không copy được' : 'Copy'}
+            {copyState === 'success'
+              ? 'Đã copy'
+              : copyState === 'failed'
+                ? 'Không copy được'
+                : 'Copy'}
           </button>
         )}
       </div>
