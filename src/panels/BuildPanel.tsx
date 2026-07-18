@@ -1,8 +1,15 @@
 import { useState } from 'react';
 import type { Edge } from '@xyflow/react';
+import { BaseButton } from '../components/base/BaseButton';
 import { compile } from '../build/compile';
 import { validate, type Issue } from '../build/validate';
 import type { BotNode } from '../types';
+
+const COPY_LABELS: Record<CopyState, string> = {
+  idle: 'Copy',
+  success: 'Đã copy',
+  failed: 'Không copy được',
+};
 
 type Props = {
   nodes: BotNode[];
@@ -44,23 +51,9 @@ export function BuildPanel({ nodes, edges, onFocusNode }: Props) {
   return (
     <div className="flex min-h-0 flex-1 flex-col p-4">
       <div className="mb-3 flex items-center gap-2">
-        <button
-          onClick={onBuild}
-          className="rounded-md bg-slate-900 px-4 py-1.5 text-sm font-medium text-white hover:bg-slate-700"
-        >
-          Build
-        </button>
+        <BaseButton label="Build" onClick={onBuild} />
         {result?.kind === 'json' && (
-          <button
-            onClick={onCopy}
-            className="rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
-          >
-            {copyState === 'success'
-              ? 'Đã copy'
-              : copyState === 'failed'
-                ? 'Không copy được'
-                : 'Copy'}
-          </button>
+          <BaseButton label={COPY_LABELS[copyState]} variant="secondary" onClick={onCopy} />
         )}
       </div>
 

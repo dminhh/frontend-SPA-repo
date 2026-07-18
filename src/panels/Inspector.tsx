@@ -1,3 +1,5 @@
+import { BaseInput } from '../components/base/BaseInput';
+import { BaseTextarea } from '../components/base/BaseTextarea';
 import { LABELS, type BotNode } from '../types';
 
 type Props = {
@@ -21,23 +23,21 @@ export function Inspector({ node, onChange }: Props) {
       </h2>
 
       {node.type === 'message' && (
-        <Field
+        <BaseTextarea
           label="Nội dung"
           value={node.data.text}
           onChange={(v) => onChange(node.id, { text: v })}
-          multiline
         />
       )}
 
       {node.type === 'ask' && (
         <>
-          <Field
+          <BaseTextarea
             label="Câu hỏi"
             value={node.data.question}
             onChange={(v) => onChange(node.id, { question: v })}
-            multiline
           />
-          <Field
+          <BaseInput
             label="Tên biến"
             value={node.data.variable}
             onChange={(v) => onChange(node.id, { variable: v })}
@@ -47,7 +47,7 @@ export function Inspector({ node, onChange }: Props) {
       )}
 
       {node.type === 'condition' && (
-        <Field
+        <BaseInput
           label="Biểu thức"
           value={node.data.expression}
           onChange={(v) => onChange(node.id, { expression: v })}
@@ -59,35 +59,5 @@ export function Inspector({ node, onChange }: Props) {
         <p className="text-sm text-slate-400">Node này không có thuộc tính nào.</p>
       )}
     </div>
-  );
-}
-
-type FieldProps = {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  multiline?: boolean;
-  mono?: boolean;
-};
-
-function Field({ label, value, onChange, multiline, mono }: FieldProps) {
-  const className = `w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm focus:border-slate-900 focus:outline-none ${
-    mono ? 'font-mono' : ''
-  }`;
-
-  return (
-    <label className="mb-3 block">
-      <span className="mb-1 block text-xs font-medium text-slate-600">{label}</span>
-      {multiline ? (
-        <textarea
-          rows={3}
-          className={className}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-        />
-      ) : (
-        <input className={className} value={value} onChange={(e) => onChange(e.target.value)} />
-      )}
-    </label>
   );
 }

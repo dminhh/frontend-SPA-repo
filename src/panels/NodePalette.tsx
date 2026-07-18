@@ -1,3 +1,4 @@
+import { BaseButton } from '../components/base/BaseButton';
 import { NODE_DEFS } from '../nodes';
 
 type Props = {
@@ -27,13 +28,9 @@ export function NodePalette({ onLoadSample }: Props) {
         Kéo node vào canvas. Nối các node bằng cách kéo từ chấm tròn dưới sang chấm tròn trên.
       </p>
 
-      <button
-        type="button"
-        onClick={onLoadSample}
-        className="mt-4 w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
-      >
-        Ví dụ
-      </button>
+      <div className="mt-4">
+        <BaseButton label="Ví dụ" variant="secondary" fullWidth onClick={onLoadSample} />
+      </div>
       <p className="mt-1.5 text-xs leading-relaxed text-slate-400">
         Đổ một kịch bản mẫu ra canvas, thay hết node đang có.
       </p>

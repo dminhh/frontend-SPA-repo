@@ -37,6 +37,7 @@ Ranh giới quan trọng nhất, phải đọc nhiều file mới thấy: **toà
 src/
   build/        validate.ts (đồ thị → danh sách lỗi) + compile.ts (đồ thị → JSON).
                 Hàm thuần, chỉ import type từ @xyflow/react. Đây là nơi duy nhất được test.
+  components/base/  base component tái dùng, không logic: BaseButton, BaseInput, BaseTextarea
   nodes/        năm node component + registry (index.ts) + accents.ts
   panels/       NodePalette, Inspector, BuildPanel — ba cột giao diện
   hooks/        useBotFlow.ts — custom hook giữ state đồ thị và mọi hành động lên nó
@@ -61,6 +62,9 @@ src/
 - Text người dùng thấy viết tiếng Việt; code, identifier, comment viết tiếng Anh.
 - Test phủ **hàm thuần** (`build/`, `sample.ts`), không test component hay kéo thả.
 - Giữ mỗi file trong `src` dưới 200 dòng (CI kiểm).
+- Nút/input/textarea lặp lại thì tách thành base component trong `src/components/base/`.
+  Base component chỉ nhận `value` + callback qua props, không tự chứa logic nghiệp vụ.
+  (Node hiển thị trên canvas dùng `NodeShell` làm base card.)
 
 ## Những cái bẫy đã cắn
 
