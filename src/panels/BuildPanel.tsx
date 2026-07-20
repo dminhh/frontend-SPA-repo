@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import type { Edge } from '@xyflow/react';
 import { BaseButton } from '../components/base/BaseButton';
-import { compile } from '../build/compile';
+import { compile, type Script } from '../build/compile';
 import { validate, type Issue } from '../build/validate';
+import { RunModal } from '../run/RunModal';
 import type { BotNode } from '../types';
 
 const COPY_LABELS: Record<CopyState, string> = {
@@ -23,6 +24,7 @@ type CopyState = 'idle' | 'success' | 'failed';
 export function BuildPanel({ nodes, edges, onFocusNode }: Props) {
   const [result, setResult] = useState<Result | null>(null);
   const [copyState, setCopyState] = useState<CopyState>('idle');
+  const [runScript, setRunScript] = useState<Script | null>(null);
 
   function onBuild() {
     setCopyState('idle');
@@ -32,6 +34,15 @@ export function BuildPanel({ nodes, edges, onFocusNode }: Props) {
         ? { kind: 'issues', issues }
         : { kind: 'json', text: JSON.stringify(compile(nodes, edges), null, 2) },
     );
+  }
+
+  function onRun() {
+    const issues = validate(nodes, edges);
+    if (issues.length > 0) {
+      setResult({ kind: 'issues', issues });
+      return;
+    }
+    setRunScript(compile(nodes, edges));
   }
 
   async function onCopy() {
@@ -52,6 +63,7 @@ export function BuildPanel({ nodes, edges, onFocusNode }: Props) {
     <div className="flex min-h-0 flex-1 flex-col p-4">
       <div className="mb-3 flex items-center gap-2">
         <BaseButton label="Build" onClick={onBuild} />
+        <BaseButton label="Chạy" variant="secondary" onClick={onRun} />
         {result?.kind === 'json' && (
           <BaseButton label={COPY_LABELS[copyState]} variant="secondary" onClick={onCopy} />
         )}
@@ -78,6 +90,8 @@ export function BuildPanel({ nodes, edges, onFocusNode }: Props) {
           {result.text}
         </pre>
       )}
+
+      {runScript && <RunModal script={runScript} onClose={() => setRunScript(null)} />}
     </div>
   );
 }
