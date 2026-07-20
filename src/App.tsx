@@ -32,7 +32,11 @@ function Canvas() {
         </ReactFlow>
       </div>
       <aside className="flex w-80 shrink-0 flex-col border-l border-slate-200 bg-white">
-        <Inspector node={flow.selected} onChange={flow.onFieldChange} />
+        <Inspector
+          node={flow.selected}
+          onChange={flow.onFieldChange}
+          onDelete={flow.onDeleteNode}
+        />
         <BuildPanel
           key={flow.buildPanelKey}
           nodes={flow.nodes}

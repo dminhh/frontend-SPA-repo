@@ -1,3 +1,4 @@
+import { BaseButton } from '../components/base/BaseButton';
 import { BaseInput } from '../components/base/BaseInput';
 import { BaseTextarea } from '../components/base/BaseTextarea';
 import { LABELS, type BotNode } from '../types';
@@ -5,9 +6,10 @@ import { LABELS, type BotNode } from '../types';
 type Props = {
   node: BotNode | undefined;
   onChange: (id: string, patch: Record<string, string>) => void;
+  onDelete: (id: string) => void;
 };
 
-export function Inspector({ node, onChange }: Props) {
+export function Inspector({ node, onChange, onDelete }: Props) {
   if (!node) {
     return (
       <div className="border-b border-slate-200 p-4 text-sm text-slate-400">
@@ -58,6 +60,10 @@ export function Inspector({ node, onChange }: Props) {
       {(node.type === 'start' || node.type === 'end') && (
         <p className="text-sm text-slate-400">Node này không có thuộc tính nào.</p>
       )}
+
+      <div className="mt-4 border-t border-slate-100 pt-3">
+        <BaseButton label="Xóa node" variant="danger" fullWidth onClick={() => onDelete(node.id)} />
+      </div>
     </div>
   );
 }

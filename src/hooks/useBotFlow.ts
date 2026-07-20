@@ -72,6 +72,16 @@ export function useBotFlow() {
     void fitView({ duration: 400, maxZoom: 1 });
   }, [setNodes, setEdges, fitView]);
 
+  const onDeleteNode = useCallback(
+    (id: string) => {
+      setNodes((nds) => nds.filter((n) => n.id !== id));
+      // Drop every edge touching the node — as its source or its target — or the
+      // graph keeps dangling edges that point at an id no longer present.
+      setEdges((eds) => eds.filter((e) => e.source !== id && e.target !== id));
+    },
+    [setNodes, setEdges],
+  );
+
   const onFocusNode = useCallback(
     (id: string) => {
       setNodes((nds) => nds.map((n) => ({ ...n, selected: n.id === id })));
@@ -90,6 +100,7 @@ export function useBotFlow() {
     onFieldChange,
     onLoadSample,
     onFocusNode,
+    onDeleteNode,
     selected: nodes.find((n) => n.selected),
     buildPanelKey: sampleLoads,
   };

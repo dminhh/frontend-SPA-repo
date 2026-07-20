@@ -1,4 +1,4 @@
-type Variant = 'primary' | 'secondary';
+type Variant = 'primary' | 'secondary' | 'danger';
 
 type Props = {
   label: string;
@@ -11,6 +11,7 @@ type Props = {
 const VARIANTS: Record<Variant, string> = {
   primary: 'bg-slate-900 text-white hover:bg-slate-700 disabled:opacity-50',
   secondary: 'border border-slate-300 text-slate-700 hover:bg-slate-50 disabled:opacity-50',
+  danger: 'border border-red-300 text-red-700 hover:bg-red-50 disabled:opacity-50',
 };
 
 /**
