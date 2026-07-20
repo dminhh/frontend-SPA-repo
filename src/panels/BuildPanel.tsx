@@ -37,6 +37,7 @@ export function BuildPanel({ nodes, edges, onFocusNode }: Props) {
   }
 
   function onRun() {
+    setCopyState('idle');
     const issues = validate(nodes, edges);
     if (issues.length > 0) {
       setResult({ kind: 'issues', issues });

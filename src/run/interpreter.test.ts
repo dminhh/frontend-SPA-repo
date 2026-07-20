@@ -77,4 +77,11 @@ describe('createRun / advance', () => {
     expect(state.status).toBe('error');
     expect(state.transcript.at(-1)?.text).toMatch(/lặp vô hạn/);
   });
+
+  it('advance trên trạng thái đã kết thúc trả về nguyên trạng thái', () => {
+    const s = script('n1', { n1: { type: 'start', next: 'n2' }, n2: { type: 'end' } });
+    const done = createRun(s);
+    expect(done.status).toBe('done');
+    expect(advance(done, s, 'bất kỳ')).toBe(done);
+  });
 });
