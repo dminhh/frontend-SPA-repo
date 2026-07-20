@@ -41,6 +41,7 @@ src/
   nodes/        năm node component + registry (index.ts) + accents.ts
   panels/       NodePalette, Inspector, BuildPanel — ba cột giao diện
   hooks/        useBotFlow.ts — custom hook giữ state đồ thị và mọi hành động lên nó
+  run/          evaluate.ts + interpreter.ts (hàm thuần, chạy Script) + RunModal.tsx (UI chat)
   App.tsx       chỉ dựng layout ba cột; gọi useBotFlow
   types.ts      union BotNode, LABELS, và hằng BRANCH
   sample.ts     flow mẫu cho nút "Ví dụ"
@@ -51,6 +52,9 @@ src/
   bên chạy bot duyệt thẳng được: đọc `start`, làm việc của node, nhảy tới `next`, lặp lại.
 - **`validate.ts` gồm 6 luật**, mỗi luật một hàm nhỏ; đồ thị phải qua hết mới được compile.
 - **`nodes/index.ts` là registry.** Thêm loại node thứ sáu = viết component + thêm một dòng.
+- **Runtime (`src/run/`) là chỗ DUY NHẤT được đánh giá `expression`**; builder vẫn coi nó là
+  chuỗi mờ. `interpreter.ts` là step-machine thuần: `createRun` chạy tới ask/end, `advance`
+  chạy tiếp. `evaluate.ts` là mini-evaluator (so sánh đơn + `&&`/`||`, không eval).
 
 ## Ràng buộc (không phá nếu chưa bàn)
 
