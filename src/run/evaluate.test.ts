@@ -42,6 +42,11 @@ describe('evaluate', () => {
     expect(() => evaluate('name > 5', { name: 'admin' })).toThrow();
   });
 
+  it('biến chưa gán trong so sánh số là lỗi', () => {
+    expect(() => evaluate('age > 5', {})).toThrow();
+    expect(() => evaluate('age <= 5', {})).toThrow();
+  });
+
   it('biểu thức rỗng hoặc sai định dạng là lỗi', () => {
     expect(() => evaluate('   ', {})).toThrow();
     expect(() => evaluate('name', {})).toThrow();

@@ -55,7 +55,8 @@ function resolveStr(operand: string, variables: Record<string, string>): string 
 
 function resolveNum(operand: string, variables: Record<string, string>): number {
   const s = resolveStr(operand, variables);
-  const n = Number(s);
-  if (Number.isNaN(n)) throw new Error(`Không so sánh số được với "${operand}" (giá trị: "${s}")`);
-  return n;
+  if (!/^-?\d+(\.\d+)?$/.test(s.trim())) {
+    throw new Error(`Không so sánh số được với "${operand}" (giá trị: "${s}")`);
+  }
+  return Number(s);
 }
