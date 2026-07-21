@@ -28,7 +28,14 @@ type SpanRecord = {
       tokens: { input: number; output: number };
       cost: number;
     }
-  | { kind: 'search'; nodeId: string; query: string; result: string; cost: number }
+  | {
+      kind: 'search';
+      nodeId: string;
+      query: string;
+      result: string;
+      tokens: { input: number; output: number };
+      cost: number;
+    }
   | { kind: 'rag'; nodeId: string; query: string; result: string; cost: number }
 );
 
@@ -85,7 +92,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           { input: s.query, output: s.result },
           { asType: 'generation', startTime, parentSpanContext },
         )
-          .update({ metadata: { cost: s.cost } })
+          .update({
+            usageDetails: { input: s.tokens.input, output: s.tokens.output },
+            metadata: { cost: s.cost },
+          })
           .end(endTime);
       } else {
         startObservation(

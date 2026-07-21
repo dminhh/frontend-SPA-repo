@@ -9,7 +9,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'method' });
 
   const { query } = req.body ?? {};
-  if (!query) return res.status(400).json({ error: 'thiếu query' });
+  if (!query?.trim()) return res.status(400).json({ error: 'thiếu query' });
 
   try {
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });

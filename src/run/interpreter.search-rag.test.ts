@@ -29,7 +29,11 @@ describe('createRun / advance with search/rag', () => {
     });
     const paused = createRun(s);
     expect(paused.status).toBe('awaiting_search');
-    const done = provideSearch(paused, s, { text: 'trời nắng', cost: 0.002 });
+    const done = provideSearch(paused, s, {
+      text: 'trời nắng',
+      tokens: { input: 10, output: 5 },
+      cost: 0.002,
+    });
     expect(done.status).toBe('done');
     expect(done.variables.news).toBe('trời nắng');
     expect(done.transcript).toContainEqual({ role: 'bot', text: 'Tin: trời nắng' });
@@ -38,6 +42,7 @@ describe('createRun / advance with search/rag', () => {
         kind: 'search',
         query: 'tin tức hôm nay',
         result: 'trời nắng',
+        tokens: { input: 10, output: 5 },
         cost: 0.002,
       }),
     );
@@ -79,5 +84,31 @@ describe('createRun / advance with search/rag', () => {
     expect(done.spans).toContainEqual(
       expect.objectContaining({ kind: 'rag', query: 'giá vé', result: 'vé 200k', cost: 0.0001 }),
     );
+  });
+
+  it('condition branches on a variable set by a search node', () => {
+    const s = script('n1', {
+      n1: { type: 'start', next: 'n2' },
+      n2: { type: 'search', query: 'thời tiết hôm nay', outputVar: 'weather', next: 'n3' },
+      n3: {
+        type: 'condition',
+        expression: "weather == 'nắng'",
+        onTrue: 'n4',
+        onFalse: 'n5',
+      },
+      n4: { type: 'message', text: 'Trời nắng, mang theo mũ.', next: 'n6' },
+      n5: { type: 'message', text: 'Trời không nắng.', next: 'n6' },
+      n6: { type: 'end' },
+    });
+    const paused = createRun(s);
+    expect(paused.status).toBe('awaiting_search');
+    const done = provideSearch(paused, s, {
+      text: 'nắng',
+      tokens: { input: 8, output: 3 },
+      cost: 0.001,
+    });
+    expect(done.status).toBe('done');
+    expect(done.variables.weather).toBe('nắng');
+    expect(done.transcript).toContainEqual({ role: 'bot', text: 'Trời nắng, mang theo mũ.' });
   });
 });

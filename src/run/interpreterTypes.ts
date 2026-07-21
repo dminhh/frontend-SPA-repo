@@ -12,7 +12,14 @@ export type SpanRecord =
       tokens: { input: number; output: number };
       cost: number;
     }
-  | { kind: 'search'; nodeId: string; query: string; result: string; cost: number }
+  | {
+      kind: 'search';
+      nodeId: string;
+      query: string;
+      result: string;
+      tokens: { input: number; output: number };
+      cost: number;
+    }
   | { kind: 'rag'; nodeId: string; query: string; result: string; cost: number };
 export type PendingLlm = {
   nodeId: string;
@@ -24,7 +31,11 @@ export type PendingLlm = {
 export type PendingSearch = { nodeId: string; query: string; outputVar: string };
 export type PendingRag = { nodeId: string; query: string; document: string; outputVar: string };
 export type LlmResult = { text: string; tokens: { input: number; output: number }; cost: number };
-export type SearchResult = { text: string; cost: number };
+export type SearchResult = {
+  text: string;
+  tokens: { input: number; output: number };
+  cost: number;
+};
 export type RagResult = { text: string; cost: number };
 export type RunState = {
   status: RunStatus;

@@ -52,10 +52,15 @@ export function provideSearch(state: RunState, script: Script, result: SearchRes
   const p = state.pendingSearch;
   const node = script.nodes[state.current];
   const nextId = 'next' in node ? (node.next ?? null) : null;
-  const spans: SpanRecord[] = [
-    ...state.spans,
-    { kind: 'search', nodeId: p.nodeId, query: p.query, result: result.text, cost: result.cost },
-  ];
+  const searchSpan: SpanRecord = {
+    kind: 'search',
+    nodeId: p.nodeId,
+    query: p.query,
+    result: result.text,
+    tokens: result.tokens,
+    cost: result.cost,
+  };
+  const spans: SpanRecord[] = [...state.spans, searchSpan];
   return runForward(
     nextId,
     { ...state.variables, [p.outputVar]: result.text },
