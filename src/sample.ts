@@ -1,16 +1,16 @@
 import type { Edge } from '@xyflow/react';
-import { BRANCH, type BotNode } from './types';
+import { BRANCH, DEFAULT_LLM_MODEL, type BotNode } from './types';
 
 /**
- * A ready-made flow for the palette's "Ví dụ" button, using all five node types
+ * A ready-made flow for the palette's "Ví dụ" button, using all six node types
  * and both condition branches so it compiles to a complete script:
  *
  *   Start → Ask(name) → Condition
  *                         ├─ true  → Message ─┐
- *                         └─ false → Message ─┴→ End
+ *                         └─ false → Message ─┴→ LLM(uses {{name}}) → End
  *
  * Returns fresh objects on every call — sharing them would re-seat nodes wherever
- * the user last dragged them. Ids run n1..n6; the canvas resumes its counter past
+ * the user last dragged them. Ids run n1..n7; the canvas resumes its counter past
  * them so a later drop cannot collide.
  */
 export function createSampleFlow(): { nodes: BotNode[]; edges: Edge[] } {
@@ -30,7 +30,18 @@ export function createSampleFlow(): { nodes: BotNode[]; edges: Edge[] } {
     },
     { id: 'n4', type: 'message', data: { text: 'Chào sếp!' }, position: { x: 120, y: 430 } },
     { id: 'n5', type: 'message', data: { text: 'Chào bạn!' }, position: { x: 520, y: 430 } },
-    { id: 'n6', type: 'end', data: {}, position: { x: 320, y: 580 } },
+    {
+      id: 'n6',
+      type: 'llm',
+      data: {
+        model: DEFAULT_LLM_MODEL,
+        systemPrompt: 'Bạn là một trợ lý thân thiện, trả lời ngắn gọn.',
+        prompt: 'Chào {{name}} một câu vui vẻ, dưới 15 từ.',
+        outputVar: 'greeting',
+      },
+      position: { x: 320, y: 580 },
+    },
+    { id: 'n7', type: 'end', data: {}, position: { x: 320, y: 720 } },
   ] as unknown as BotNode[];
 
   const edges: Edge[] = [
@@ -40,6 +51,7 @@ export function createSampleFlow(): { nodes: BotNode[]; edges: Edge[] } {
     { id: 'e3-5', source: 'n3', target: 'n5', sourceHandle: BRANCH.false },
     { id: 'e4-6', source: 'n4', target: 'n6' },
     { id: 'e5-6', source: 'n5', target: 'n6' },
+    { id: 'e6-7', source: 'n6', target: 'n7' },
   ];
 
   return { nodes, edges };

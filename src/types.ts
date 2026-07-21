@@ -20,6 +20,12 @@ export type BotNode =
  *  moves all three sites together. */
 export const BRANCH = { true: 'true', false: 'false' } as const;
 
+/** The only model an LLM node runs — not user-editable, so this is the single
+ *  source of truth (NODE_DEFS, LlmNode's display, and the sample flow all read
+ *  it) instead of the model string being duplicated and able to drift, the way
+ *  a stale 'gpt-4o-mini' default once did. */
+export const DEFAULT_LLM_MODEL = 'gpt-5.4-nano';
+
 export const LABELS: Record<BotNodeType, string> = {
   start: 'Start',
   message: 'Message',

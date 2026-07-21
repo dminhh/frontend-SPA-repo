@@ -1,5 +1,5 @@
 import { Handle, Position, type NodeProps } from '@xyflow/react';
-import type { LlmNodeType } from '../types';
+import { DEFAULT_LLM_MODEL, type LlmNodeType } from '../types';
 import { NodeShell } from './NodeShell';
 import { ACCENTS } from './accents';
 
@@ -7,7 +7,7 @@ export function LlmNode({ data, selected }: NodeProps<LlmNodeType>) {
   return (
     <NodeShell title="LLM" accent={ACCENTS.llm} selected={selected}>
       <Handle type="target" position={Position.Top} />
-      <p className="font-mono text-xs text-slate-500">{data.model || 'gpt-5.4-nano'}</p>
+      <p className="font-mono text-xs text-slate-500">{data.model || DEFAULT_LLM_MODEL}</p>
       <p className={data.prompt ? '' : 'text-slate-400 italic'}>
         {data.prompt || 'Chưa có prompt'}
       </p>

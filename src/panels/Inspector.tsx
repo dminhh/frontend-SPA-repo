@@ -59,12 +59,7 @@ export function Inspector({ node, onChange, onDelete }: Props) {
 
       {node.type === 'llm' && (
         <>
-          <BaseInput
-            label="Model"
-            value={node.data.model}
-            onChange={(v) => onChange(node.id, { model: v })}
-            mono
-          />
+          <p className="mb-3 font-mono text-xs text-slate-500">Model: {node.data.model}</p>
           <BaseTextarea
             label="System prompt"
             value={node.data.systemPrompt}

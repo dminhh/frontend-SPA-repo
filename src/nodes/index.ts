@@ -1,4 +1,4 @@
-import type { BotNodeType } from '../types';
+import { DEFAULT_LLM_MODEL, type BotNodeType } from '../types';
 import { ACCENTS } from './accents';
 import { StartNode } from './StartNode';
 import { MessageNode } from './MessageNode';
@@ -38,6 +38,6 @@ export const NODE_DEFS: NodeDef[] = [
     type: 'llm',
     label: 'LLM',
     accent: ACCENTS.llm,
-    defaultData: { model: 'gpt-5.4-nano', systemPrompt: '', prompt: '', outputVar: '' },
+    defaultData: { model: DEFAULT_LLM_MODEL, systemPrompt: '', prompt: '', outputVar: '' },
   },
 ];
