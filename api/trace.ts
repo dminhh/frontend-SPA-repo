@@ -28,6 +28,8 @@ type SpanRecord = {
       tokens: { input: number; output: number };
       cost: number;
     }
+  | { kind: 'search'; nodeId: string; query: string; result: string; cost: number }
+  | { kind: 'rag'; nodeId: string; query: string; result: string; cost: number }
 );
 
 // Same-origin only — the frontend and this function are both served from the
@@ -65,7 +67,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           { input: s.input, output: s.output },
           { startTime, parentSpanContext },
         ).end(endTime);
-      } else {
+      } else if (s.kind === 'llm') {
         startObservation(
           s.nodeId,
           { model: s.model, input: s.prompt },
@@ -77,6 +79,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             metadata: { cost: s.cost },
           })
           .end(endTime);
+      } else if (s.kind === 'search') {
+        startObservation(
+          'search',
+          { input: s.query, output: s.result },
+          { asType: 'generation', startTime, parentSpanContext },
+        )
+          .update({ metadata: { cost: s.cost } })
+          .end(endTime);
+      } else {
+        startObservation(
+          'rag',
+          { input: s.query, output: s.result, metadata: { cost: s.cost } },
+          { startTime, parentSpanContext },
+        ).end(endTime);
       }
     }
 

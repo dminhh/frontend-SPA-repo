@@ -2,14 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import type { Script } from '../build/compile';
 import { BaseButton } from '../components/base/BaseButton';
 import { BaseModal } from '../components/base/BaseModal';
-import {
-  advance,
-  createRun,
-  provideLlm,
-  type PendingLlm,
-  type RunState,
-  type TranscriptEntry,
-} from './interpreter';
+import { advance, createRun, type RunState, type TranscriptEntry } from './interpreter';
+import { usePendingCalls } from './usePendingCalls';
 import { useSpanTimings } from './useSpanTimings';
 
 type Props = {
@@ -17,28 +11,13 @@ type Props = {
   onClose: () => void;
 };
 
-type LlmResult = { text: string; tokens: { input: number; output: number }; cost: number };
-
-/** Calls the backend's /api/llm route. The app is served from the same origin as
- *  the backend (both on Vercel), so a relative path is enough — no base URL to
- *  configure. Throws on network error or a non-ok status. */
-async function callLlm(pending: PendingLlm): Promise<LlmResult> {
-  const res = await fetch('/api/llm', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: pending.model, system: pending.system, prompt: pending.prompt }),
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return (await res.json()) as LlmResult;
-}
-
 export function RunModal({ script, onClose }: Props) {
   const [state, setState] = useState<RunState>(() => createRun(script));
   const [input, setInput] = useState('');
   const [traceSent, setTraceSent] = useState(false);
-  const llmRequestedFor = useRef<number | null>(null);
   const traceSentFor = useRef(false);
   const timings = useSpanTimings(state.spans);
+  const pendingCalls = usePendingCalls(state, script, setState, timings);
 
   function submit() {
     if (state.status !== 'awaiting_input') return;
@@ -47,50 +26,12 @@ export function RunModal({ script, onClose }: Props) {
   }
 
   function restart() {
-    llmRequestedFor.current = null;
+    pendingCalls.reset();
     traceSentFor.current = false;
     setTraceSent(false);
     timings.reset();
     setState(createRun(script));
   }
-
-  // Runs the pending LLM node against the backend once per pause. Guards on
-  // spans.length rather than nodeId: a flow can loop back through the same llm
-  // node (llm → condition → llm), and each pass adds spans, so spans.length
-  // uniquely identifies this particular pause even when the node id repeats —
-  // a nodeId-only guard would silently stop firing on the second visit and
-  // leave the modal stuck on "Đang gọi LLM…" forever.
-  useEffect(() => {
-    if (state.status !== 'awaiting_llm' || !state.pendingLlm) return;
-    const pending = state.pendingLlm;
-    if (llmRequestedFor.current === state.spans.length) return;
-    llmRequestedFor.current = state.spans.length;
-
-    const startedAt = Date.now();
-    callLlm(pending)
-      .then((result) => {
-        const endedAt = Date.now();
-        setState((prev) => {
-          const next = provideLlm(prev, script, result);
-          // provideLlm appends exactly one span (the llm generation) at the
-          // end — record its real network duration now.
-          timings.recordLlmTiming(next.spans.length - 1, { startedAt, endedAt });
-          const hint: TranscriptEntry = {
-            role: 'system',
-            text: `~${result.tokens.input + result.tokens.output} token, ~$${result.cost.toFixed(5)}`,
-          };
-          return { ...next, transcript: [...next.transcript, hint] };
-        });
-      })
-      .catch((err) => {
-        const message = err instanceof Error ? err.message : String(err);
-        setState((prev) => ({
-          ...prev,
-          status: 'error',
-          transcript: [...prev.transcript, { role: 'system', text: `Lỗi gọi LLM: ${message}` }],
-        }));
-      });
-  }, [state, script, timings]);
 
   // Best-effort trace upload once the run finishes (success or error).
   useEffect(() => {
@@ -137,6 +78,10 @@ export function RunModal({ script, onClose }: Props) {
           </div>
         ) : state.status === 'awaiting_llm' ? (
           <p className="text-center text-sm text-slate-400">Đang gọi LLM…</p>
+        ) : state.status === 'awaiting_search' ? (
+          <p className="text-center text-sm text-slate-400">Đang tìm kiếm…</p>
+        ) : state.status === 'awaiting_rag' ? (
+          <p className="text-center text-sm text-slate-400">Đang tra cứu tài liệu…</p>
         ) : (
           <BaseButton label="Chạy lại" variant="secondary" onClick={restart} />
         )}

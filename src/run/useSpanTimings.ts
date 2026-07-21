@@ -9,10 +9,11 @@ export type TimedSpanRecord = SpanRecord & Timing;
  * without the interpreter itself calling Date.now() (it must stay pure). Node
  * spans (start/message/ask/condition/end) run synchronously with no real work
  * between them, so a batch of them appearing between two renders genuinely
- * did complete in near-zero time — that's not a bug to paper over. The llm
- * span is the one case with real elapsed time (the network round trip); call
- * `recordLlmTiming` with an exact measurement before the automatic batch
- * estimate below has a chance to render and overwrite it with a rough one.
+ * did complete in near-zero time — that's not a bug to paper over. The llm,
+ * search, and rag spans are the cases with real elapsed time (a network round
+ * trip); call `recordTiming` with an exact measurement before the automatic
+ * batch estimate below has a chance to render and overwrite it with a rough
+ * one.
  */
 export function useSpanTimings(spans: SpanRecord[]) {
   const timings = useRef<Timing[]>([]);
@@ -33,7 +34,7 @@ export function useSpanTimings(spans: SpanRecord[]) {
     lastObservedAt.current = now;
   }, [spans]);
 
-  function recordLlmTiming(index: number, timing: Timing) {
+  function recordTiming(index: number, timing: Timing) {
     timings.current[index] = timing;
   }
 
@@ -51,5 +52,5 @@ export function useSpanTimings(spans: SpanRecord[]) {
     }));
   }
 
-  return { recordLlmTiming, reset, toTimedSpans };
+  return { recordTiming, reset, toTimedSpans };
 }
