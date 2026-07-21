@@ -1,6 +1,7 @@
 import type { Node } from '@xyflow/react';
 
-export type BotNodeType = 'start' | 'message' | 'ask' | 'condition' | 'end' | 'llm';
+export type BotNodeType =
+  'start' | 'message' | 'ask' | 'condition' | 'end' | 'llm' | 'search' | 'rag';
 
 export type StartNodeType = Node<Record<string, never>, 'start'>;
 export type MessageNodeType = Node<{ text: string }, 'message'>;
@@ -11,9 +12,18 @@ export type LlmNodeType = Node<
   { model: string; systemPrompt: string; prompt: string; outputVar: string },
   'llm'
 >;
+export type SearchNodeType = Node<{ query: string; outputVar: string }, 'search'>;
+export type RagNodeType = Node<{ query: string; document: string; outputVar: string }, 'rag'>;
 
 export type BotNode =
-  StartNodeType | MessageNodeType | AskNodeType | ConditionNodeType | EndNodeType | LlmNodeType;
+  | StartNodeType
+  | MessageNodeType
+  | AskNodeType
+  | ConditionNodeType
+  | EndNodeType
+  | LlmNodeType
+  | SearchNodeType
+  | RagNodeType;
 
 /** Handle ids on ConditionNode's two source handles. The canvas sets these as
  *  `sourceHandle`; validate() and compile() read them back. Shared so a rename
@@ -33,4 +43,6 @@ export const LABELS: Record<BotNodeType, string> = {
   condition: 'Condition',
   end: 'End',
   llm: 'LLM',
+  search: 'Search',
+  rag: 'RAG',
 };

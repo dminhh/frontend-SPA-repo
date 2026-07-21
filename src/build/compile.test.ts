@@ -99,4 +99,35 @@ describe('compile', () => {
       next: 'n3',
     });
   });
+
+  it('compiles a search node with its fields and next', () => {
+    const nodes = [
+      node('n1', 'start'),
+      node('n2', 'search', { query: 'thời tiết ở {{city}}', outputVar: 'weather' }),
+      node('n3', 'end'),
+    ];
+    const edges = [edge('n1', 'n2'), edge('n2', 'n3')];
+    expect(compile(nodes, edges).nodes.n2).toStrictEqual({
+      type: 'search',
+      query: 'thời tiết ở {{city}}',
+      outputVar: 'weather',
+      next: 'n3',
+    });
+  });
+
+  it('compiles a rag node with its fields and next', () => {
+    const nodes = [
+      node('n1', 'start'),
+      node('n2', 'rag', { query: '{{question}}', document: 'nội dung tài liệu', outputVar: 'doc' }),
+      node('n3', 'end'),
+    ];
+    const edges = [edge('n1', 'n2'), edge('n2', 'n3')];
+    expect(compile(nodes, edges).nodes.n2).toStrictEqual({
+      type: 'rag',
+      query: '{{question}}',
+      document: 'nội dung tài liệu',
+      outputVar: 'doc',
+      next: 'n3',
+    });
+  });
 });

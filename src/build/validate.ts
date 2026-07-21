@@ -5,7 +5,7 @@ export type Issue = { nodeId?: string; message: string };
 
 /** Node types that must have exactly one outgoing edge. `condition` is handled
  *  separately (two branches) and `end` terminates the flow. */
-const NEEDS_NEXT: BotNodeType[] = ['start', 'message', 'ask', 'llm'];
+const NEEDS_NEXT: BotNodeType[] = ['start', 'message', 'ask', 'llm', 'search', 'rag'];
 
 const REQUIRED_FIELDS: Partial<Record<BotNodeType, { key: string; label: string }[]>> = {
   message: [{ key: 'text', label: 'nội dung' }],
@@ -17,6 +17,15 @@ const REQUIRED_FIELDS: Partial<Record<BotNodeType, { key: string; label: string 
   llm: [
     { key: 'model', label: 'model' },
     { key: 'prompt', label: 'prompt' },
+    { key: 'outputVar', label: 'tên biến ra' },
+  ],
+  search: [
+    { key: 'query', label: 'câu truy vấn' },
+    { key: 'outputVar', label: 'tên biến ra' },
+  ],
+  rag: [
+    { key: 'query', label: 'câu truy vấn' },
+    { key: 'document', label: 'tài liệu' },
     { key: 'outputVar', label: 'tên biến ra' },
   ],
 };

@@ -14,6 +14,8 @@ export type CompiledNode =
       outputVar: string;
       next?: string;
     }
+  | { type: 'search'; query: string; outputVar: string; next?: string }
+  | { type: 'rag'; query: string; document: string; outputVar: string; next?: string }
   | { type: 'end' };
 
 export type Script = {
@@ -66,6 +68,21 @@ function compileNode(node: BotNode, edges: Edge[]): CompiledNode {
         model: node.data.model,
         systemPrompt: node.data.systemPrompt,
         prompt: node.data.prompt,
+        outputVar: node.data.outputVar,
+        next: targetOf(edges, node.id),
+      });
+    case 'search':
+      return prune<CompiledNode>({
+        type: 'search',
+        query: node.data.query,
+        outputVar: node.data.outputVar,
+        next: targetOf(edges, node.id),
+      });
+    case 'rag':
+      return prune<CompiledNode>({
+        type: 'rag',
+        query: node.data.query,
+        document: node.data.document,
         outputVar: node.data.outputVar,
         next: targetOf(edges, node.id),
       });
