@@ -38,6 +38,6 @@ export const NODE_DEFS: NodeDef[] = [
     type: 'llm',
     label: 'LLM',
     accent: ACCENTS.llm,
-    defaultData: { model: 'gpt-4o-mini', systemPrompt: '', prompt: '', outputVar: '' },
+    defaultData: { model: 'gpt-5.4-nano', systemPrompt: '', prompt: '', outputVar: '' },
   },
 ];
