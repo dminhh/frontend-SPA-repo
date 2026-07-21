@@ -51,21 +51,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       { input: { spanCount: spans.length } },
       { startTime: new Date(runStart) },
     );
+    // The instance method (rootSpan.startObservation) doesn't accept a custom
+    // startTime — only the free function does. Use it for children too, with
+    // parentSpanContext to preserve the parent-child relationship.
+    const parentSpanContext = rootSpan.otelSpan.spanContext();
 
     for (const s of typedSpans) {
       const startTime = new Date(s.startedAt ?? now);
       const endTime = s.endedAt ?? now;
       if (s.kind === 'node') {
-        rootSpan
-          .startObservation(s.type, { input: s.input, output: s.output }, { startTime })
-          .end(endTime);
+        startObservation(
+          s.type,
+          { input: s.input, output: s.output },
+          { startTime, parentSpanContext },
+        ).end(endTime);
       } else {
-        rootSpan
-          .startObservation(
-            s.nodeId,
-            { model: s.model, input: s.prompt },
-            { asType: 'generation', startTime },
-          )
+        startObservation(
+          s.nodeId,
+          { model: s.model, input: s.prompt },
+          { asType: 'generation', startTime, parentSpanContext },
+        )
           .update({
             output: s.response,
             usageDetails: { input: s.tokens.input, output: s.tokens.output },
