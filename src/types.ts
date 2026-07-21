@@ -13,12 +13,7 @@ export type LlmNodeType = Node<
 >;
 
 export type BotNode =
-  | StartNodeType
-  | MessageNodeType
-  | AskNodeType
-  | ConditionNodeType
-  | EndNodeType
-  | LlmNodeType;
+  StartNodeType | MessageNodeType | AskNodeType | ConditionNodeType | EndNodeType | LlmNodeType;
 
 /** Handle ids on ConditionNode's two source handles. The canvas sets these as
  *  `sourceHandle`; validate() and compile() read them back. Shared so a rename

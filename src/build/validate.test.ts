@@ -171,8 +171,14 @@ describe('validate', () => {
   });
 
   it('an llm node needs exactly one outgoing edge', () => {
-    const nodes = [node('n1', 'start'), node('n2', 'llm', { model: 'gpt-4o-mini', systemPrompt: '', prompt: 'hi', outputVar: 'r' })];
+    const nodes = [
+      node('n1', 'start'),
+      node('n2', 'llm', { model: 'gpt-4o-mini', systemPrompt: '', prompt: 'hi', outputVar: 'r' }),
+    ];
     const edges = [edge('n1', 'n2')];
-    expect(validate(nodes, edges)).toContainEqual({ nodeId: 'n2', message: 'Node LLM: chưa nối tới node tiếp theo' });
+    expect(validate(nodes, edges)).toContainEqual({
+      nodeId: 'n2',
+      message: 'Node LLM: chưa nối tới node tiếp theo',
+    });
   });
 });

@@ -6,7 +6,14 @@ export type CompiledNode =
   | { type: 'message'; text: string; next?: string }
   | { type: 'ask'; question: string; variable: string; next?: string }
   | { type: 'condition'; expression: string; onTrue?: string; onFalse?: string }
-  | { type: 'llm'; model: string; systemPrompt: string; prompt: string; outputVar: string; next?: string }
+  | {
+      type: 'llm';
+      model: string;
+      systemPrompt: string;
+      prompt: string;
+      outputVar: string;
+      next?: string;
+    }
   | { type: 'end' };
 
 export type Script = {

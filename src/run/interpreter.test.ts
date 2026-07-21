@@ -89,7 +89,14 @@ describe('createRun / advance', () => {
     const s = script('n1', {
       n1: { type: 'start', next: 'n2' },
       n2: { type: 'ask', question: 'Tên?', variable: 'name', next: 'n3' },
-      n3: { type: 'llm', model: 'gpt-4o-mini', systemPrompt: 'x', prompt: 'Chào {{name}}', outputVar: 'reply', next: 'n4' },
+      n3: {
+        type: 'llm',
+        model: 'gpt-4o-mini',
+        systemPrompt: 'x',
+        prompt: 'Chào {{name}}',
+        outputVar: 'reply',
+        next: 'n4',
+      },
       n4: { type: 'end' },
     });
     const afterAsk = advance(createRun(s), s, 'Minh');
@@ -101,17 +108,34 @@ describe('createRun / advance', () => {
   it('provideLlm stores the reply, records an llm span, and continues', () => {
     const s = script('n1', {
       n1: { type: 'start', next: 'n2' },
-      n2: { type: 'llm', model: 'gpt-4o-mini', systemPrompt: '', prompt: 'hi', outputVar: 'reply', next: 'n3' },
+      n2: {
+        type: 'llm',
+        model: 'gpt-4o-mini',
+        systemPrompt: '',
+        prompt: 'hi',
+        outputVar: 'reply',
+        next: 'n3',
+      },
       n3: { type: 'message', text: 'Bot nói: {{reply}}', next: 'n4' },
       n4: { type: 'end' },
     });
     const paused = createRun(s);
     expect(paused.status).toBe('awaiting_llm');
-    const done = provideLlm(paused, s, { text: 'xin chào', tokens: { input: 3, output: 5 }, cost: 0.0001 });
+    const done = provideLlm(paused, s, {
+      text: 'xin chào',
+      tokens: { input: 3, output: 5 },
+      cost: 0.0001,
+    });
     expect(done.status).toBe('done');
     expect(done.variables.reply).toBe('xin chào');
     expect(done.spans).toContainEqual(
-      expect.objectContaining({ kind: 'llm', model: 'gpt-4o-mini', response: 'xin chào', tokens: { input: 3, output: 5 }, cost: 0.0001 }),
+      expect.objectContaining({
+        kind: 'llm',
+        model: 'gpt-4o-mini',
+        response: 'xin chào',
+        tokens: { input: 3, output: 5 },
+        cost: 0.0001,
+      }),
     );
   });
 

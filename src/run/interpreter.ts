@@ -18,7 +18,13 @@ export type SpanRecord =
       cost: number;
     };
 
-export type PendingLlm = { nodeId: string; model: string; system: string; prompt: string; outputVar: string };
+export type PendingLlm = {
+  nodeId: string;
+  model: string;
+  system: string;
+  prompt: string;
+  outputVar: string;
+};
 
 export type RunState = {
   status: RunStatus;
@@ -112,7 +118,14 @@ function runForward(
     const node = script.nodes[current];
     if (!node) {
       transcript.push({ role: 'system', text: `Không tìm thấy node "${current}".` });
-      return { status: 'error', current: null, variables, transcript, spans, error: 'missing-node' };
+      return {
+        status: 'error',
+        current: null,
+        variables,
+        transcript,
+        spans,
+        error: 'missing-node',
+      };
     }
 
     switch (node.type) {
@@ -144,7 +157,13 @@ function runForward(
           variables,
           transcript,
           spans,
-          pendingLlm: { nodeId: current, model: node.model, system: node.systemPrompt, prompt, outputVar: node.outputVar },
+          pendingLlm: {
+            nodeId: current,
+            model: node.model,
+            system: node.systemPrompt,
+            prompt,
+            outputVar: node.outputVar,
+          },
         };
       }
       case 'condition': {

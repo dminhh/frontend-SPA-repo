@@ -81,13 +81,22 @@ describe('compile', () => {
   it('compiles an llm node with its fields and next', () => {
     const nodes = [
       node('n1', 'start'),
-      node('n2', 'llm', { model: 'gpt-4o-mini', systemPrompt: 'Bạn là trợ lý.', prompt: 'Chào {{name}}', outputVar: 'reply' }),
+      node('n2', 'llm', {
+        model: 'gpt-4o-mini',
+        systemPrompt: 'Bạn là trợ lý.',
+        prompt: 'Chào {{name}}',
+        outputVar: 'reply',
+      }),
       node('n3', 'end'),
     ];
     const edges = [edge('n1', 'n2'), edge('n2', 'n3')];
     expect(compile(nodes, edges).nodes.n2).toStrictEqual({
-      type: 'llm', model: 'gpt-4o-mini', systemPrompt: 'Bạn là trợ lý.',
-      prompt: 'Chào {{name}}', outputVar: 'reply', next: 'n3',
+      type: 'llm',
+      model: 'gpt-4o-mini',
+      systemPrompt: 'Bạn là trợ lý.',
+      prompt: 'Chào {{name}}',
+      outputVar: 'reply',
+      next: 'n3',
     });
   });
 });
