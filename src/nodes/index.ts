@@ -5,6 +5,7 @@ import { MessageNode } from './MessageNode';
 import { AskNode } from './AskNode';
 import { ConditionNode } from './ConditionNode';
 import { EndNode } from './EndNode';
+import { LlmNode } from './LlmNode';
 
 export const nodeTypes = {
   start: StartNode,
@@ -12,6 +13,7 @@ export const nodeTypes = {
   ask: AskNode,
   condition: ConditionNode,
   end: EndNode,
+  llm: LlmNode,
 };
 
 export type NodeDef = {
@@ -32,4 +34,10 @@ export const NODE_DEFS: NodeDef[] = [
     defaultData: { expression: '' },
   },
   { type: 'end', label: 'End', accent: ACCENTS.end, defaultData: {} },
+  {
+    type: 'llm',
+    label: 'LLM',
+    accent: ACCENTS.llm,
+    defaultData: { model: 'gpt-4o-mini', systemPrompt: '', prompt: '', outputVar: '' },
+  },
 ];

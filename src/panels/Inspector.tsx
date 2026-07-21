@@ -57,6 +57,33 @@ export function Inspector({ node, onChange, onDelete }: Props) {
         />
       )}
 
+      {node.type === 'llm' && (
+        <>
+          <BaseInput
+            label="Model"
+            value={node.data.model}
+            onChange={(v) => onChange(node.id, { model: v })}
+            mono
+          />
+          <BaseTextarea
+            label="System prompt"
+            value={node.data.systemPrompt}
+            onChange={(v) => onChange(node.id, { systemPrompt: v })}
+          />
+          <BaseTextarea
+            label="Prompt (chèn biến bằng {{tên}})"
+            value={node.data.prompt}
+            onChange={(v) => onChange(node.id, { prompt: v })}
+          />
+          <BaseInput
+            label="Biến lưu câu trả lời"
+            value={node.data.outputVar}
+            onChange={(v) => onChange(node.id, { outputVar: v })}
+            mono
+          />
+        </>
+      )}
+
       {(node.type === 'start' || node.type === 'end') && (
         <p className="text-sm text-slate-400">Node này không có thuộc tính nào.</p>
       )}
