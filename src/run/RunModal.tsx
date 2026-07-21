@@ -37,7 +37,7 @@ export function RunModal({ script, onClose }: Props) {
   const [state, setState] = useState<RunState>(() => createRun(script));
   const [input, setInput] = useState('');
   const [traceSent, setTraceSent] = useState(false);
-  const llmRequestedFor = useRef<string | null>(null);
+  const llmRequestedFor = useRef<number | null>(null);
   const traceSentFor = useRef(false);
 
   function submit() {
@@ -53,12 +53,17 @@ export function RunModal({ script, onClose }: Props) {
     setState(createRun(script));
   }
 
-  // Runs the pending LLM node against the backend once per node instance.
+  // Runs the pending LLM node against the backend once per pause. Guards on
+  // spans.length rather than nodeId: a flow can loop back through the same llm
+  // node (llm → condition → llm), and each pass adds spans, so spans.length
+  // uniquely identifies this particular pause even when the node id repeats —
+  // a nodeId-only guard would silently stop firing on the second visit and
+  // leave the modal stuck on "Đang gọi LLM…" forever.
   useEffect(() => {
     if (state.status !== 'awaiting_llm' || !state.pendingLlm) return;
     const pending = state.pendingLlm;
-    if (llmRequestedFor.current === pending.nodeId) return;
-    llmRequestedFor.current = pending.nodeId;
+    if (llmRequestedFor.current === state.spans.length) return;
+    llmRequestedFor.current = state.spans.length;
 
     callLlm(API_BASE, pending)
       .then((result) => {
@@ -92,7 +97,12 @@ export function RunModal({ script, onClose }: Props) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ spans: state.spans }),
     })
-      .then((res) => res.ok && setTraceSent(true))
+      // api/trace.ts always responds 200, even on failure (trace delivery is
+      // best-effort) — the real result is in the body's `ok` field, not the
+      // HTTP status. Checking res.ok alone would report a Langfuse outage as
+      // a successful send.
+      .then((res) => res.json())
+      .then((body: { ok: boolean }) => body.ok && setTraceSent(true))
       .catch((err) => console.warn('Gửi trace thất bại:', err));
   }, [state.status, state.spans]);
 

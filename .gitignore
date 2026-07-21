@@ -14,6 +14,12 @@ dist-ssr
 coverage
 *.tsbuildinfo
 
+# Vite env files (VITE_API_BASE, and anything with secrets a future .env might
+# hold) — *.local already covers .env.local, but plain .env is not a *.local
+# match and must be listed explicitly.
+.env
+.env.production
+
 # Agent tooling scratch, not part of the project
 .claude/settings.local.json
 .superpowers/
