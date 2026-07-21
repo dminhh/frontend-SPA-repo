@@ -8,9 +8,16 @@ const langfuseSpanProcessor = new LangfuseSpanProcessor();
 const sdk = new NodeSDK({ spanProcessors: [langfuseSpanProcessor] });
 sdk.start();
 
-// Mirrors src/run/interpreter.ts's SpanRecord. Not imported across the api/src
-// build boundary — kept structurally identical instead.
-type SpanRecord =
+// Mirrors src/run/interpreter.ts's SpanRecord, plus the wall-clock timing
+// RunModal attaches (the interpreter itself stays pure — no Date.now() there).
+// Not imported across the api/src build boundary — kept structurally
+// identical instead. Timing is optional so a manual curl without it (as used
+// to verify this endpoint before the frontend sent real timings) still works,
+// falling back to "right now" for both ends.
+type SpanRecord = {
+  startedAt?: number;
+  endedAt?: number;
+} & (
   | { kind: 'node'; nodeId: string; type: string; input?: string; output?: string }
   | {
       kind: 'llm';
@@ -20,7 +27,8 @@ type SpanRecord =
       response: string;
       tokens: { input: number; output: number };
       cost: number;
-    };
+    }
+);
 
 // Same-origin only — the frontend and this function are both served from the
 // same Vercel deployment, so no CORS headers or preflight handling are needed.
@@ -31,24 +39,43 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!Array.isArray(spans)) return res.status(400).json({ error: 'thiếu spans' });
 
   try {
-    const rootSpan = startObservation('bot-run', { input: { spanCount: spans.length } });
+    const now = Date.now();
+    const typedSpans = spans as SpanRecord[];
+    const starts = typedSpans.map((s) => s.startedAt ?? now);
+    const ends = typedSpans.map((s) => s.endedAt ?? now);
+    const runStart = starts.length ? Math.min(...starts) : now;
+    const runEnd = ends.length ? Math.max(...ends) : now;
 
-    for (const s of spans as SpanRecord[]) {
+    const rootSpan = startObservation(
+      'bot-run',
+      { input: { spanCount: spans.length } },
+      { startTime: new Date(runStart) },
+    );
+
+    for (const s of typedSpans) {
+      const startTime = new Date(s.startedAt ?? now);
+      const endTime = s.endedAt ?? now;
       if (s.kind === 'node') {
-        rootSpan.startObservation(s.type, { input: s.input, output: s.output }).end();
+        rootSpan
+          .startObservation(s.type, { input: s.input, output: s.output }, { startTime })
+          .end(endTime);
       } else {
         rootSpan
-          .startObservation(s.nodeId, { model: s.model, input: s.prompt }, { asType: 'generation' })
+          .startObservation(
+            s.nodeId,
+            { model: s.model, input: s.prompt },
+            { asType: 'generation', startTime },
+          )
           .update({
             output: s.response,
             usageDetails: { input: s.tokens.input, output: s.tokens.output },
             metadata: { cost: s.cost },
           })
-          .end();
+          .end(endTime);
       }
     }
 
-    rootSpan.end();
+    rootSpan.end(runEnd);
 
     // Must flush before the serverless function returns, or buffered spans
     // are lost when the process is frozen/recycled.

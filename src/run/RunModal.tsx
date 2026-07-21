@@ -10,6 +10,7 @@ import {
   type RunState,
   type TranscriptEntry,
 } from './interpreter';
+import { useSpanTimings } from './useSpanTimings';
 
 type Props = {
   script: Script;
@@ -37,6 +38,7 @@ export function RunModal({ script, onClose }: Props) {
   const [traceSent, setTraceSent] = useState(false);
   const llmRequestedFor = useRef<number | null>(null);
   const traceSentFor = useRef(false);
+  const timings = useSpanTimings(state.spans);
 
   function submit() {
     if (state.status !== 'awaiting_input') return;
@@ -48,6 +50,7 @@ export function RunModal({ script, onClose }: Props) {
     llmRequestedFor.current = null;
     traceSentFor.current = false;
     setTraceSent(false);
+    timings.reset();
     setState(createRun(script));
   }
 
@@ -63,10 +66,15 @@ export function RunModal({ script, onClose }: Props) {
     if (llmRequestedFor.current === state.spans.length) return;
     llmRequestedFor.current = state.spans.length;
 
+    const startedAt = Date.now();
     callLlm(pending)
       .then((result) => {
+        const endedAt = Date.now();
         setState((prev) => {
           const next = provideLlm(prev, script, result);
+          // provideLlm appends exactly one span (the llm generation) at the
+          // end — record its real network duration now.
+          timings.recordLlmTiming(next.spans.length - 1, { startedAt, endedAt });
           const hint: TranscriptEntry = {
             role: 'system',
             text: `~${result.tokens.input + result.tokens.output} token, ~$${result.cost.toFixed(5)}`,
@@ -82,7 +90,7 @@ export function RunModal({ script, onClose }: Props) {
           transcript: [...prev.transcript, { role: 'system', text: `Lỗi gọi LLM: ${message}` }],
         }));
       });
-  }, [state, script]);
+  }, [state, script, timings]);
 
   // Best-effort trace upload once the run finishes (success or error).
   useEffect(() => {
@@ -93,7 +101,7 @@ export function RunModal({ script, onClose }: Props) {
     fetch('/api/trace', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ spans: state.spans }),
+      body: JSON.stringify({ spans: timings.toTimedSpans() }),
     })
       // api/trace.ts always responds 200, even on failure (trace delivery is
       // best-effort) — the real result is in the body's `ok` field, not the
@@ -102,7 +110,7 @@ export function RunModal({ script, onClose }: Props) {
       .then((res) => res.json())
       .then((body: { ok: boolean }) => body.ok && setTraceSent(true))
       .catch((err) => console.warn('Gửi trace thất bại:', err));
-  }, [state.status, state.spans]);
+  }, [state.status, state.spans, timings]);
 
   return (
     <BaseModal open title="Chạy thử bot" onClose={onClose}>
