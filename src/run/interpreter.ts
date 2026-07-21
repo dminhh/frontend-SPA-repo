@@ -1,43 +1,10 @@
 import type { Script } from '../build/compile';
 import { evaluate } from './evaluate';
 import { interpolate } from './interpolate';
-export type TranscriptEntry = { role: 'bot' | 'user' | 'system'; text: string };
-export type RunStatus =
-  'awaiting_input' | 'awaiting_llm' | 'awaiting_search' | 'awaiting_rag' | 'done' | 'error';
-export type SpanRecord =
-  | { kind: 'node'; nodeId: string; type: string; input?: string; output?: string }
-  | {
-      kind: 'llm';
-      nodeId: string;
-      model: string;
-      prompt: string;
-      response: string;
-      tokens: { input: number; output: number };
-      cost: number;
-    }
-  | { kind: 'search'; nodeId: string; query: string; result: string; cost: number }
-  | { kind: 'rag'; nodeId: string; query: string; result: string; cost: number };
-export type PendingLlm = {
-  nodeId: string;
-  model: string;
-  system: string;
-  prompt: string;
-  outputVar: string;
-};
-export type PendingSearch = { nodeId: string; query: string; outputVar: string };
-export type PendingRag = { nodeId: string; query: string; document: string; outputVar: string };
-export type RunState = {
-  status: RunStatus;
-  current: string | null;
-  variables: Record<string, string>;
-  transcript: TranscriptEntry[];
-  spans: SpanRecord[];
-  pendingVariable?: string;
-  pendingLlm?: PendingLlm;
-  pendingSearch?: PendingSearch;
-  pendingRag?: PendingRag;
-  error?: string;
-};
+import type { TranscriptEntry, SpanRecord, RunState } from './interpreterTypes';
+import type { LlmResult, SearchResult, RagResult } from './interpreterTypes';
+export type { TranscriptEntry, RunStatus, SpanRecord, PendingLlm } from './interpreterTypes';
+export type { PendingSearch, PendingRag, RunState } from './interpreterTypes';
 export function createRun(script: Script): RunState {
   return runForward(script.start, {}, [], [], script);
 }
@@ -54,11 +21,7 @@ export function advance(state: RunState, script: Script, input: string): RunStat
     script,
   );
 }
-export function provideLlm(
-  state: RunState,
-  script: Script,
-  result: { text: string; tokens: { input: number; output: number }; cost: number },
-): RunState {
+export function provideLlm(state: RunState, script: Script, result: LlmResult): RunState {
   if (state.status !== 'awaiting_llm' || state.current === null || !state.pendingLlm) return state;
   const p = state.pendingLlm;
   const node = script.nodes[state.current];
@@ -83,7 +46,42 @@ export function provideLlm(
     script,
   );
 }
-export function runForward(
+export function provideSearch(state: RunState, script: Script, result: SearchResult): RunState {
+  if (state.status !== 'awaiting_search' || state.current === null || !state.pendingSearch)
+    return state;
+  const p = state.pendingSearch;
+  const node = script.nodes[state.current];
+  const nextId = 'next' in node ? (node.next ?? null) : null;
+  const spans: SpanRecord[] = [
+    ...state.spans,
+    { kind: 'search', nodeId: p.nodeId, query: p.query, result: result.text, cost: result.cost },
+  ];
+  return runForward(
+    nextId,
+    { ...state.variables, [p.outputVar]: result.text },
+    state.transcript,
+    spans,
+    script,
+  );
+}
+export function provideRag(state: RunState, script: Script, result: RagResult): RunState {
+  if (state.status !== 'awaiting_rag' || state.current === null || !state.pendingRag) return state;
+  const p = state.pendingRag;
+  const node = script.nodes[state.current];
+  const nextId = 'next' in node ? (node.next ?? null) : null;
+  const spans: SpanRecord[] = [
+    ...state.spans,
+    { kind: 'rag', nodeId: p.nodeId, query: p.query, result: result.text, cost: result.cost },
+  ];
+  return runForward(
+    nextId,
+    { ...state.variables, [p.outputVar]: result.text },
+    state.transcript,
+    spans,
+    script,
+  );
+}
+function runForward(
   startAt: string | null,
   variables: Record<string, string>,
   priorTranscript: TranscriptEntry[],
@@ -195,4 +193,3 @@ export function runForward(
   }
   return { status: 'done', current: null, variables, transcript, spans };
 }
-export { provideSearch, provideRag } from './interpreter-search-rag';
