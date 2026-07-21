@@ -6,6 +6,8 @@ import { AskNode } from './AskNode';
 import { ConditionNode } from './ConditionNode';
 import { EndNode } from './EndNode';
 import { LlmNode } from './LlmNode';
+import { SearchNode } from './SearchNode';
+import { RagNode } from './RagNode';
 
 export const nodeTypes = {
   start: StartNode,
@@ -14,6 +16,8 @@ export const nodeTypes = {
   condition: ConditionNode,
   end: EndNode,
   llm: LlmNode,
+  search: SearchNode,
+  rag: RagNode,
 };
 
 export type NodeDef = {
@@ -39,5 +43,17 @@ export const NODE_DEFS: NodeDef[] = [
     label: 'LLM',
     accent: ACCENTS.llm,
     defaultData: { model: DEFAULT_LLM_MODEL, systemPrompt: '', prompt: '', outputVar: '' },
+  },
+  {
+    type: 'search',
+    label: 'Search',
+    accent: ACCENTS.search,
+    defaultData: { query: '', outputVar: '' },
+  },
+  {
+    type: 'rag',
+    label: 'RAG',
+    accent: ACCENTS.rag,
+    defaultData: { query: '', document: '', outputVar: '' },
   },
 ];

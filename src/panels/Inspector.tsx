@@ -79,6 +79,44 @@ export function Inspector({ node, onChange, onDelete }: Props) {
         </>
       )}
 
+      {node.type === 'search' && (
+        <>
+          <BaseTextarea
+            label="Câu truy vấn (chèn biến bằng {{tên}})"
+            value={node.data.query}
+            onChange={(v) => onChange(node.id, { query: v })}
+          />
+          <BaseInput
+            label="Biến lưu kết quả"
+            value={node.data.outputVar}
+            onChange={(v) => onChange(node.id, { outputVar: v })}
+            mono
+          />
+        </>
+      )}
+
+      {node.type === 'rag' && (
+        <>
+          <BaseTextarea
+            label="Câu truy vấn (chèn biến bằng {{tên}})"
+            value={node.data.query}
+            onChange={(v) => onChange(node.id, { query: v })}
+          />
+          <BaseTextarea
+            label="Tài liệu tham khảo"
+            value={node.data.document}
+            onChange={(v) => onChange(node.id, { document: v })}
+            rows={6}
+          />
+          <BaseInput
+            label="Biến lưu kết quả"
+            value={node.data.outputVar}
+            onChange={(v) => onChange(node.id, { outputVar: v })}
+            mono
+          />
+        </>
+      )}
+
       {(node.type === 'start' || node.type === 'end') && (
         <p className="text-sm text-slate-400">Node này không có thuộc tính nào.</p>
       )}

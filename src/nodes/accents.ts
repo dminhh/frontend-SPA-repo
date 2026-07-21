@@ -12,4 +12,6 @@ export const ACCENTS: Record<BotNodeType, string> = {
   condition: 'bg-amber-600',
   end: 'bg-slate-600',
   llm: 'bg-fuchsia-600',
+  search: 'bg-teal-600',
+  rag: 'bg-rose-600',
 };
