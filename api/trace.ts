@@ -39,11 +39,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         rootSpan.startObservation(s.type, { input: s.input, output: s.output }).end();
       } else {
         rootSpan
-          .startObservation(
-            s.nodeId,
-            { model: s.model, input: s.prompt },
-            { asType: 'generation' },
-          )
+          .startObservation(s.nodeId, { model: s.model, input: s.prompt }, { asType: 'generation' })
           .update({
             output: s.response,
             usageDetails: { input: s.tokens.input, output: s.tokens.output },
