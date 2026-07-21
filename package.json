@@ -16,6 +16,9 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
+    "@langfuse/otel": "^5.9.1",
+    "@langfuse/tracing": "^5.9.1",
+    "@opentelemetry/sdk-node": "^0.220.0",
     "@vercel/node": "^5.8.26",
     "@xyflow/react": "^12.11.2",
     "openai": "^6.48.0",
