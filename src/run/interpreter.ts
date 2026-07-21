@@ -1,11 +1,9 @@
 import type { Script } from '../build/compile';
 import { evaluate } from './evaluate';
 import { interpolate } from './interpolate';
-
 export type TranscriptEntry = { role: 'bot' | 'user' | 'system'; text: string };
-
-export type RunStatus = 'awaiting_input' | 'awaiting_llm' | 'done' | 'error';
-
+export type RunStatus =
+  'awaiting_input' | 'awaiting_llm' | 'awaiting_search' | 'awaiting_rag' | 'done' | 'error';
 export type SpanRecord =
   | { kind: 'node'; nodeId: string; type: string; input?: string; output?: string }
   | {
@@ -16,8 +14,9 @@ export type SpanRecord =
       response: string;
       tokens: { input: number; output: number };
       cost: number;
-    };
-
+    }
+  | { kind: 'search'; nodeId: string; query: string; result: string; cost: number }
+  | { kind: 'rag'; nodeId: string; query: string; result: string; cost: number };
 export type PendingLlm = {
   nodeId: string;
   model: string;
@@ -25,34 +24,28 @@ export type PendingLlm = {
   prompt: string;
   outputVar: string;
 };
-
+export type PendingSearch = { nodeId: string; query: string; outputVar: string };
+export type PendingRag = { nodeId: string; query: string; document: string; outputVar: string };
 export type RunState = {
   status: RunStatus;
-  current: string | null; // the ask/llm node the run is paused at, else null
+  current: string | null;
   variables: Record<string, string>;
   transcript: TranscriptEntry[];
   spans: SpanRecord[];
   pendingVariable?: string;
   pendingLlm?: PendingLlm;
+  pendingSearch?: PendingSearch;
+  pendingRag?: PendingRag;
   error?: string;
 };
-
-const MAX_STEPS = 1000;
-
-/** Starts a run at script.start and walks forward to the first stop. */
 export function createRun(script: Script): RunState {
   return runForward(script.start, {}, [], [], script);
 }
-
-/** Records the answer to the paused ask node, then walks forward again. A
- *  done/error state is returned unchanged. */
 export function advance(state: RunState, script: Script, input: string): RunState {
   if (state.status !== 'awaiting_input' || state.current === null) return state;
-
   const askNode = script.nodes[state.current];
   const variable = state.pendingVariable ?? '';
   const nextId = 'next' in askNode ? (askNode.next ?? null) : null;
-
   return runForward(
     nextId,
     { ...state.variables, [variable]: input },
@@ -61,9 +54,6 @@ export function advance(state: RunState, script: Script, input: string): RunStat
     script,
   );
 }
-
-/** Records the LLM response for the paused llm node, then walks forward again.
- *  A state not awaiting_llm is returned unchanged. */
 export function provideLlm(
   state: RunState,
   script: Script,
@@ -93,8 +83,7 @@ export function provideLlm(
     script,
   );
 }
-
-function runForward(
+export function runForward(
   startAt: string | null,
   variables: Record<string, string>,
   priorTranscript: TranscriptEntry[],
@@ -105,16 +94,11 @@ function runForward(
   const spans = [...priorSpans];
   let current = startAt;
   let steps = 0;
-
   while (current !== null) {
-    if (steps++ >= MAX_STEPS) {
-      transcript.push({
-        role: 'system',
-        text: 'Kịch bản chạy quá 1000 bước — có thể lặp vô hạn.',
-      });
+    if (steps++ >= 1000) {
+      transcript.push({ role: 'system', text: 'Kịch bản chạy quá 1000 bước — có thể lặp vô hạn.' });
       return { status: 'error', current: null, variables, transcript, spans, error: 'loop' };
     }
-
     const node = script.nodes[current];
     if (!node) {
       transcript.push({ role: 'system', text: `Không tìm thấy node "${current}".` });
@@ -127,17 +111,18 @@ function runForward(
         error: 'missing-node',
       };
     }
-
     switch (node.type) {
       case 'start':
         spans.push({ kind: 'node', nodeId: current, type: node.type });
         current = node.next ?? null;
         break;
-      case 'message':
+      case 'message': {
         spans.push({ kind: 'node', nodeId: current, type: node.type });
-        transcript.push({ role: 'bot', text: node.text });
+        const messageText = interpolate(node.text, variables);
+        transcript.push({ role: 'bot', text: messageText });
         current = node.next ?? null;
         break;
+      }
       case 'ask':
         spans.push({ kind: 'node', nodeId: current, type: node.type });
         transcript.push({ role: 'bot', text: node.question });
@@ -166,6 +151,29 @@ function runForward(
           },
         };
       }
+      case 'search': {
+        const query = interpolate(node.query, variables);
+        return {
+          status: 'awaiting_search',
+          current,
+          variables,
+          transcript,
+          spans,
+          pendingSearch: { nodeId: current, query, outputVar: node.outputVar },
+        };
+      }
+      case 'rag': {
+        const query = interpolate(node.query, variables);
+        const document = interpolate(node.document, variables);
+        return {
+          status: 'awaiting_rag',
+          current,
+          variables,
+          transcript,
+          spans,
+          pendingRag: { nodeId: current, query, document, outputVar: node.outputVar },
+        };
+      }
       case 'condition': {
         spans.push({ kind: 'node', nodeId: current, type: node.type });
         let result: boolean;
@@ -185,8 +193,6 @@ function runForward(
         return { status: 'done', current: null, variables, transcript, spans };
     }
   }
-
-  // A non-end node without `next` ends the run; validation prevents this on the
-  // canvas, but the runtime stays defensive.
   return { status: 'done', current: null, variables, transcript, spans };
 }
+export { provideSearch, provideRag } from './interpreter-search-rag';
