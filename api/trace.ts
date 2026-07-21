@@ -2,7 +2,6 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { LangfuseSpanProcessor } from '@langfuse/otel';
 import { startObservation } from '@langfuse/tracing';
-import { cors } from './_cors';
 
 // Module-scope init: survives warm invocations, harmless to re-run per cold start.
 const langfuseSpanProcessor = new LangfuseSpanProcessor();
@@ -23,9 +22,9 @@ type SpanRecord =
       cost: number;
     };
 
+// Same-origin only — the frontend and this function are both served from the
+// same Vercel deployment, so no CORS headers or preflight handling are needed.
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  cors(res);
-  if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'method' });
 
   const { spans } = req.body ?? {};

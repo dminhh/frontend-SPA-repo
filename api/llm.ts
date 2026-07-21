@@ -1,11 +1,10 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import OpenAI from 'openai';
-import { cors } from './_cors';
 import { costOf } from './_pricing';
 
+// Same-origin only — the frontend and this function are both served from the
+// same Vercel deployment, so no CORS headers or preflight handling are needed.
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  cors(res);
-  if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'method' });
 
   const { model, system, prompt } = req.body ?? {};

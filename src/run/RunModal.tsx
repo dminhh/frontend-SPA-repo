@@ -11,8 +11,6 @@ import {
   type TranscriptEntry,
 } from './interpreter';
 
-const API_BASE = import.meta.env.VITE_API_BASE;
-
 type Props = {
   script: Script;
   onClose: () => void;
@@ -20,11 +18,11 @@ type Props = {
 
 type LlmResult = { text: string; tokens: { input: number; output: number }; cost: number };
 
-/** Calls the backend's /api/llm route. Throws if the backend URL is missing, on
- *  network error, or on a non-ok status. */
-async function callLlm(base: string | undefined, pending: PendingLlm): Promise<LlmResult> {
-  if (!base) throw new Error('Chưa cấu hình backend (VITE_API_BASE)');
-  const res = await fetch(`${base}/api/llm`, {
+/** Calls the backend's /api/llm route. The app is served from the same origin as
+ *  the backend (both on Vercel), so a relative path is enough — no base URL to
+ *  configure. Throws on network error or a non-ok status. */
+async function callLlm(pending: PendingLlm): Promise<LlmResult> {
+  const res = await fetch('/api/llm', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ model: pending.model, system: pending.system, prompt: pending.prompt }),
@@ -65,7 +63,7 @@ export function RunModal({ script, onClose }: Props) {
     if (llmRequestedFor.current === state.spans.length) return;
     llmRequestedFor.current = state.spans.length;
 
-    callLlm(API_BASE, pending)
+    callLlm(pending)
       .then((result) => {
         setState((prev) => {
           const next = provideLlm(prev, script, result);
@@ -89,10 +87,10 @@ export function RunModal({ script, onClose }: Props) {
   // Best-effort trace upload once the run finishes (success or error).
   useEffect(() => {
     if (state.status !== 'done' && state.status !== 'error') return;
-    if (traceSentFor.current || !API_BASE) return;
+    if (traceSentFor.current) return;
     traceSentFor.current = true;
 
-    fetch(`${API_BASE}/api/trace`, {
+    fetch('/api/trace', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ spans: state.spans }),
