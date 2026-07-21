@@ -156,4 +156,23 @@ describe('validate', () => {
     const edges = [edge('n1', 'n2'), edge('n2', 'n3', 'true'), edge('n2', 'n4', 'false')];
     expect(validate(nodes, edges)).toEqual([]);
   });
+
+  it('rejects an llm node with empty required fields', () => {
+    const nodes = [
+      node('n1', 'start'),
+      node('n2', 'llm', { model: '', systemPrompt: '', prompt: '', outputVar: '' }),
+      node('n3', 'end'),
+    ];
+    const edges = [edge('n1', 'n2'), edge('n2', 'n3')];
+    const issues = validate(nodes, edges);
+    expect(issues).toContainEqual({ nodeId: 'n2', message: 'Node LLM: chưa nhập model' });
+    expect(issues).toContainEqual({ nodeId: 'n2', message: 'Node LLM: chưa nhập prompt' });
+    expect(issues).toContainEqual({ nodeId: 'n2', message: 'Node LLM: chưa nhập tên biến ra' });
+  });
+
+  it('an llm node needs exactly one outgoing edge', () => {
+    const nodes = [node('n1', 'start'), node('n2', 'llm', { model: 'gpt-4o-mini', systemPrompt: '', prompt: 'hi', outputVar: 'r' })];
+    const edges = [edge('n1', 'n2')];
+    expect(validate(nodes, edges)).toContainEqual({ nodeId: 'n2', message: 'Node LLM: chưa nối tới node tiếp theo' });
+  });
 });

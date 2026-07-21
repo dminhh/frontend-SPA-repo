@@ -77,4 +77,17 @@ describe('compile', () => {
     const compiled = compile(nodes, edges).nodes.n2;
     expect(compiled).toMatchObject({ expression: 'this is (not! valid' });
   });
+
+  it('compiles an llm node with its fields and next', () => {
+    const nodes = [
+      node('n1', 'start'),
+      node('n2', 'llm', { model: 'gpt-4o-mini', systemPrompt: 'Bạn là trợ lý.', prompt: 'Chào {{name}}', outputVar: 'reply' }),
+      node('n3', 'end'),
+    ];
+    const edges = [edge('n1', 'n2'), edge('n2', 'n3')];
+    expect(compile(nodes, edges).nodes.n2).toStrictEqual({
+      type: 'llm', model: 'gpt-4o-mini', systemPrompt: 'Bạn là trợ lý.',
+      prompt: 'Chào {{name}}', outputVar: 'reply', next: 'n3',
+    });
+  });
 });

@@ -6,6 +6,7 @@ export type CompiledNode =
   | { type: 'message'; text: string; next?: string }
   | { type: 'ask'; question: string; variable: string; next?: string }
   | { type: 'condition'; expression: string; onTrue?: string; onFalse?: string }
+  | { type: 'llm'; model: string; systemPrompt: string; prompt: string; outputVar: string; next?: string }
   | { type: 'end' };
 
 export type Script = {
@@ -51,6 +52,15 @@ function compileNode(node: BotNode, edges: Edge[]): CompiledNode {
         expression: node.data.expression,
         onTrue: targetOf(edges, node.id, BRANCH.true),
         onFalse: targetOf(edges, node.id, BRANCH.false),
+      });
+    case 'llm':
+      return prune<CompiledNode>({
+        type: 'llm',
+        model: node.data.model,
+        systemPrompt: node.data.systemPrompt,
+        prompt: node.data.prompt,
+        outputVar: node.data.outputVar,
+        next: targetOf(edges, node.id),
       });
     case 'end':
       return { type: 'end' };
