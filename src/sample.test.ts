@@ -16,7 +16,9 @@ describe('createSampleFlow', () => {
     expect(script.version).toBe(1);
 
     const types = Object.values(script.nodes).map((n) => n.type);
-    expect(new Set(types)).toEqual(new Set(['start', 'message', 'ask', 'condition', 'end', 'llm']));
+    expect(new Set(types)).toEqual(
+      new Set(['start', 'message', 'ask', 'condition', 'end', 'llm', 'search', 'rag']),
+    );
 
     const condition = Object.values(script.nodes).find((n) => n.type === 'condition');
     expect(condition).toMatchObject({ onTrue: expect.any(String), onFalse: expect.any(String) });
